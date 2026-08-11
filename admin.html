@@ -866,8 +866,24 @@
                             <label style="font-size:0.8rem;color:var(--text-muted);">About Summary Bio</label>
                             <textarea id="site-profile-about" placeholder="Write a short summary..." style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);"></textarea>
                         </div>
+                </div>
+
+                <!-- Admin Credentials Card -->
+                <div class="admin-card" style="margin-top:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3><i class="fas fa-key" style="color:var(--accent);"></i> Admin Login & Security Settings</h3>
+                    </div>
+                    <form onsubmit="handleAdminSecuritySubmit(event)" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;">
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Admin Email Address</label>
+                            <input type="email" id="admin-security-email" placeholder="admin@example.com" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">New Admin Password</label>
+                            <input type="password" id="admin-security-password" placeholder="Enter new password" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
                         <div style="grid-column:1/-1;">
-                            <button type="submit" class="btn-primary" style="width:max-content;padding:10px 24px;"><i class="fas fa-save"></i> Save Profile Settings</button>
+                            <button type="submit" class="btn-primary" style="width:max-content;padding:10px 24px;"><i class="fas fa-shield-halved"></i> Update Admin Credentials</button>
                         </div>
                     </form>
                 </div>
@@ -1003,8 +1019,14 @@
     <!-- JavaScript Application Logic -->
     <script>
         let firebaseDb = null;
-        let ADMIN_EMAIL = window.ENV?.ADMIN_EMAIL || "prasanth.kum22@gmail.com";
-        let ADMIN_PASSWORD = window.ENV?.ADMIN_PASSWORD || "prasanth";
+        
+        function getAdminEmail() {
+            return localStorage.getItem('portfolio_admin_email') || window.ENV?.ADMIN_EMAIL || "prasanth.kum22@gmail.com";
+        }
+
+        function getAdminPassword() {
+            return localStorage.getItem('portfolio_admin_password') || window.ENV?.ADMIN_PASSWORD || "prasanth";
+        }
 
         // Initialize App
         document.addEventListener("DOMContentLoaded", () => {
@@ -1033,7 +1055,7 @@
             e.preventDefault();
             const email = document.getElementById("admin-email").value.trim();
             const password = document.getElementById("admin-password").value;
-            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+            if (email === getAdminEmail() && password === getAdminPassword()) {
                 sessionStorage.setItem("admin_auth", "true");
                 showDashboard();
                 showToast("✨ Welcome to Admin Dashboard!", "success");
@@ -2101,6 +2123,12 @@
                 document.getElementById('site-profile-linkedin').value = profile.linkedin || '';
                 document.getElementById('site-profile-instagram').value = profile.instagram || '';
                 document.getElementById('site-profile-about').value = profile.about || '';
+
+                // Populate security settings fields
+                const emailElem = document.getElementById('admin-security-email');
+                const passElem = document.getElementById('admin-security-password');
+                if (emailElem) emailElem.value = getAdminEmail();
+                if (passElem) passElem.value = getAdminPassword();
             } catch (e) {
                 console.error("Error loading profile form:", e);
             }
@@ -2121,6 +2149,19 @@
             };
             localStorage.setItem('portfolio_site_profile', JSON.stringify(profile));
             showToast("✨ Profile settings saved! Reflected on index.html.", "success");
+        }
+
+        function handleAdminSecuritySubmit(e) {
+            e.preventDefault();
+            const newEmail = document.getElementById('admin-security-email').value.trim();
+            const newPassword = document.getElementById('admin-security-password').value;
+            if (newEmail && newPassword) {
+                localStorage.setItem('portfolio_admin_email', newEmail);
+                localStorage.setItem('portfolio_admin_password', newPassword);
+                showToast("🔐 Admin credentials updated successfully!", "success");
+            } else {
+                showToast("⚠️ Please enter a valid email and password.", "error");
+            }
         }
 
         /* Toast Helper */

@@ -1,0 +1,16 @@
+# Secrets & Environment Configuration
+.env
+.env.local
+.env.*.local
+
+# Dependencies & Build Output
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating System & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

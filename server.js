@@ -14,8 +14,7 @@ const MIME_TYPES = {
     '.jpeg': 'image/jpeg',
     '.gif': 'image/gif',
     '.svg': 'image/svg+xml',
-    '.pdf': 'application/pdf',
-    '.env': 'text/plain'
+    '.pdf': 'application/pdf'
 };
 
 const server = http.createServer((req, res) => {
@@ -26,6 +25,13 @@ const server = http.createServer((req, res) => {
     
     // Remove query strings
     filePath = filePath.split('?')[0];
+
+    // Block access to dotfiles and sensitive config files (.env, .git)
+    if (filePath.includes('/.') || filePath.endsWith('.env')) {
+        res.writeHead(403, { 'Content-Type': 'text/html' });
+        res.end('<h1>403 Forbidden: Access Denied</h1>', 'utf-8');
+        return;
+    }
 
     // Map to local file system
     const absolutePath = path.join(__dirname, filePath);
