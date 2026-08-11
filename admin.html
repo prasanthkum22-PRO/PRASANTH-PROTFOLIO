@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — K. Prasanth Portfolio</title>
+    <!-- FontAwesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase & Cloudinary SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+
+    <!-- Global App Configuration (file:// protocol support) -->
+    <script src="config.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #f6f4fc;
+            --bg-card: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            --border: rgba(139, 92, 246, 0.18);
+            --accent: #7c3aed;
+            --accent-light: #a855f7;
+            --accent-glow: rgba(124, 58, 237, 0.18);
+            --text-primary: #1e1938;
+            --text-muted: #6b638d;
+            --grid-line: rgba(139, 92, 246, 0.08);
+            --shadow: 0 10px 30px rgba(124, 58, 237, 0.08);
+            --success: #10b981;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-primary);
+            background-image:
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 32px 32px;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ── Login Screen ───────────────────────── */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 44px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: #fff;
+            margin: 0 auto 20px;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 38px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 20px var(--accent-glow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px var(--accent-glow);
+        }
+
+        .btn-secondary {
+            padding: 9px 18px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Admin Dashboard Layout ────────────────── */
+        #admin-panel {
+            display: none;
+        }
+
+        .admin-nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .nav-brand i {
+            color: var(--accent);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-count {
+            background: var(--accent-glow);
+            border: 1px solid var(--border);
+            color: var(--accent-light);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .dashboard {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 24px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        /* ── Tabs Navigation ─────────────────────── */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 28px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-glass);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.35s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Form & Content Cards ────────────────── */
+        .admin-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .msg-card, .item-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .msg-card:hover, .item-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-del {
+            padding: 6px 12px;
+            background: var(--danger-bg);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: var(--danger);
+            font-family: inherit;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-del:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* ── Full-Screen Notion/CMS Block Editor Overlay ── */
+        #project-idea-editor {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background-color: var(--bg-primary);
+            background-image:
+                linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+            background-size: 28px 28px;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .editor-topbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .editor-topbar-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .editor-canvas-wrap {
+            flex: 1;
+            max-width: 840px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 36px 20px 80px;
+        }
+
+        .post-title-input {
+            width: 100%;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            background: transparent;
+            border: none;
+            outline: none;
+            margin-bottom: 24px;
+            font-family: inherit;
+        }
+
+        .post-title-input::placeholder {
+            color: #a09ab8;
+        }
+
+        .editor-block-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 8px;
+            position: relative;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.25s ease;
+        }
+
+        .block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .block-type-tag {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .block-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .block-btn-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .block-btn-icon:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .block-btn-icon.del:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+            background: var(--danger-bg);
+        }
+
+        .heading-pill-btns {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .heading-pill {
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .heading-pill.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* Inline add block separator button */
+        .inline-add-sep {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 6px 0;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+
+        .inline-add-sep:hover {
+            opacity: 1;
+        }
+
+        .inline-add-btn {
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1px dashed var(--border);
+            background: var(--bg-card);
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .inline-add-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-style: solid;
+        }
+
+        .add-block-zone {
+            text-align: center;
+            padding: 28px 16px;
+            border: 2px dashed var(--border);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.4);
+            margin-top: 20px;
+        }
+
+        .btn-add-block {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px var(--accent-glow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .btn-add-block:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 28px var(--accent-glow);
+        }
+
+        /* ── Block Picker Modal Overlay ───────────────── */
+        #block-picker-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1050;
+            background: rgba(0, 0, 0, 0.5);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .block-picker-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 520px;
+            width: 92%;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.3s ease;
+        }
+
+        .picker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .picker-item-btn {
+            padding: 16px 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .picker-item-btn:hover {
+            border-color: var(--accent);
+            background: rgba(124, 58, 237, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .picker-item-btn i {
+            font-size: 1.4rem;
+            color: var(--accent);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { background: #052e16; border: 1px solid #166534; color: #86efac; }
+        #toast.error { background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; }
+    </style>
+</head>
+
+<body>
+
+    <!-- ════════════════════════════════════════
+         1. LOGIN SCREEN
+    ════════════════════════════════════════ -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-icon"><i class="fas fa-lock"></i></div>
+            <h2 class="login-title">Admin Sign In</h2>
+            <p class="login-subtitle">Access your portfolio dashboard</p>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="admin-email" placeholder="admin@example.com" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="admin-password" placeholder="Password" required>
+                    <i class="fas fa-key"></i>
+                </div>
+                <button type="submit" class="btn-primary" id="login-btn" style="margin-top: 10px;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         2. ADMIN DASHBOARD
+    ════════════════════════════════════════ -->
+    <div id="admin-panel">
+        <!-- Top Nav -->
+        <nav class="admin-nav">
+            <div class="nav-brand">
+                <i class="fas fa-gauge-high"></i>
+                <span>Portfolio Admin</span>
+            </div>
+            <div class="nav-actions">
+                <span class="badge-count" id="msg-count-badge">0 Messages</span>
+                <button class="btn-secondary" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Dashboard Control Panel</h1>
+                <p>Manage contact messages, blogs, projects, certificates, ideas, and site profile info.</p>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="switchTab('messages')">
+                    <i class="fas fa-envelope"></i> Messages
+                </button>
+                <button class="tab-btn" onclick="switchTab('blogs')">
+                    <i class="fas fa-blog"></i> Blog Posts
+                </button>
+                <button class="tab-btn" onclick="switchTab('projects')">
+                    <i class="fas fa-laptop-code"></i> Projects
+                </button>
+                <button class="tab-btn" onclick="switchTab('certificates')">
+                    <i class="fas fa-certificate"></i> Certificates
+                </button>
+                <button class="tab-btn" onclick="switchTab('ideas')">
+                    <i class="fas fa-lightbulb"></i> Project Ideas
+                </button>
+                <button class="tab-btn" onclick="switchTab('profile')">
+                    <i class="fas fa-user-gear"></i> Profile & Site Info
+                </button>
+            </div>
+
+            <!-- Tab 1: Messages -->
+            <div id="tab-messages" class="tab-content active">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <h3><i class="fas fa-inbox" style="color:var(--accent);"></i> Contact Messages Inbox</h3>
+                        <input type="text" id="msg-search" placeholder="Search messages..." oninput="renderMessages()" style="width:240px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                    </div>
+                    <div id="messages-grid" class="cards-grid">
+                        <p style="color:var(--text-muted);grid-column:1/-1;">Loading messages...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Blogs -->
+            <div id="tab-blogs" class="tab-content">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <h3 style="display:flex;align-items:center;gap:8px;">
+                                <i class="fas fa-pen-to-square" style="color:var(--accent);"></i> Blog Posts List
+                            </h3>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                                Create dynamic block-by-block blog posts with headings, text highlights, step guides, buttons, images, code, and videos.
+                            </p>
+                        </div>
+                        <button class="btn-primary" onclick="openCmsEditor('blog')" style="width:auto;padding:10px 22px;">
+                            <i class="fas fa-plus"></i> New Blog Post
+                        </button>
+                    </div>
+                    <div id="blogs-grid" class="cards-grid"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Projects -->
+            <div id="tab-projects" class="tab-content">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <h3 style="display:flex;align-items:center;gap:8px;">
+                                <i class="fas fa-laptop-code" style="color:var(--accent);"></i> Projects List
+                            </h3>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                                Build rich project showcases block-by-block with tech badges, live demo buttons, step guides, screenshots, and code snippets.
+                            </p>
+                        </div>
+                        <button class="btn-primary" onclick="openCmsEditor('project')" style="width:auto;padding:10px 22px;">
+                            <i class="fas fa-plus"></i> New Project
+                        </button>
+                    </div>
+                    <div id="projects-grid" class="cards-grid"></div>
+                </div>
+            </div>
+
+            <!-- Tab 4: Certificates -->
+            <div id="tab-certificates" class="tab-content">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <h3 style="display:flex;align-items:center;gap:8px;">
+                                <i class="fas fa-certificate" style="color:var(--accent);"></i> Certificates List
+                            </h3>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                                Showcase certificates with custom image blocks, verification buttons, syllabus steps, and highlight badges.
+                            </p>
+                        </div>
+                        <button class="btn-primary" onclick="openCmsEditor('certificate')" style="width:auto;padding:10px 22px;">
+                            <i class="fas fa-plus"></i> New Certificate
+                        </button>
+                    </div>
+                    <div id="certificates-grid" class="cards-grid"></div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Ideas -->
+            <div id="tab-ideas" class="tab-content">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                        <div>
+                            <h3 style="display:flex;align-items:center;gap:8px;">
+                                <i class="fas fa-lightbulb" style="color:var(--accent);"></i> Project Guides List
+                            </h3>
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                                Create dynamic block-by-block posts with headings, text highlights, step guides, buttons, code blocks, and videos.
+                            </p>
+                        </div>
+                        <button class="btn-primary" onclick="openCmsEditor('idea')" style="width:auto;padding:10px 22px;">
+                            <i class="fas fa-plus"></i> New Project Guide
+                        </button>
+                    </div>
+                    <div id="ideas-grid" class="cards-grid"></div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Profile & Site Info -->
+            <div id="tab-profile" class="tab-content">
+                <div class="admin-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+                        <h3><i class="fas fa-user-gear" style="color:var(--accent);"></i> Profile & Site Sidebar Settings</h3>
+                        <a href="index.html" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> Preview Live Index</a>
+                    </div>
+                    <form onsubmit="handleSiteProfileSubmit(event)" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;">
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Full Name *</label>
+                            <input type="text" id="site-profile-name" placeholder="K. Prasanth" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Title / Designation *</label>
+                            <input type="text" id="site-profile-title" placeholder="Web Developer | Designer" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Avatar Photo URL</label>
+                            <div style="display:flex;gap:8px;">
+                                <input type="url" id="site-profile-avatar" placeholder="co-founder.jpg" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                                <button type="button" class="btn-secondary" onclick="openCloudinaryWidget('site-profile-avatar')"><i class="fas fa-upload"></i></button>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Email *</label>
+                            <input type="email" id="site-profile-email" placeholder="prasanth.kum22@gmail.com" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Phone *</label>
+                            <input type="tel" id="site-profile-phone" placeholder="+91 82486 78722" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">GitHub URL</label>
+                            <input type="url" id="site-profile-github" placeholder="https://github.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">LinkedIn URL</label>
+                            <input type="url" id="site-profile-linkedin" placeholder="https://linkedin.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--text-muted);">Instagram URL</label>
+                            <input type="url" id="site-profile-instagram" placeholder="https://instagram.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <label style="font-size:0.8rem;color:var(--text-muted);">About Summary Bio</label>
+                            <textarea id="site-profile-about" placeholder="Write a short summary..." style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);"></textarea>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <button type="submit" class="btn-primary" style="width:max-content;padding:10px 24px;"><i class="fas fa-save"></i> Save Profile Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         3. FULL-SCREEN NOTION/CMS CONTENT BUILDER
+    ════════════════════════════════════════ -->
+    <div id="project-idea-editor">
+        <!-- Top Bar -->
+        <div class="editor-topbar">
+            <button class="btn-secondary" onclick="closeCmsEditor()" title="Exit without saving">
+                <i class="fas fa-arrow-left"></i> <span id="cms-editor-back-text">Back</span>
+            </button>
+            <div class="editor-topbar-title" id="cms-editor-header-title">
+                <i class="fas fa-cubes" style="color: var(--accent);"></i>
+                Content Builder
+            </div>
+            <button type="button" class="btn-primary" onclick="postCmsContent()" style="width: auto; padding: 9px 24px;">
+                <i class="fas fa-paper-plane"></i> Publish Post
+            </button>
+        </div>
+
+        <!-- Canvas -->
+        <div class="editor-canvas-wrap">
+            <input type="text" id="idea-post-title" class="post-title-input" placeholder="Title your project guide…" autocomplete="off">
+
+            <!-- Dedicated Cover Image Bar -->
+            <div style="margin-bottom:20px;padding:14px 18px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);">
+                <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <i class="fas fa-image" style="color:var(--accent);"></i> Post Cover / Banner Image (Thumbnail)
+                </label>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <input type="url" id="cms-cover-image" placeholder="Image URL (e.g. https://... or click Upload)" style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.88rem;outline:none;">
+                    <button type="button" class="btn-secondary" onclick="openCloudinaryWidget('cms-cover-image')">
+                        <i class="fas fa-upload"></i> Upload Cover
+                    </button>
+                </div>
+            </div>
+
+            <div id="idea-blocks-canvas"></div>
+
+            <!-- Add Block Trigger Zone -->
+            <div class="add-block-zone" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);padding:14px;border-radius:14px;border:1px dashed var(--border);">
+                <button class="btn-add-block" onclick="openBlockPicker()" title="Add content block">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <div style="font-size:0.85rem;color:var(--text-muted);font-weight:500;">
+                    Click <strong style="color:var(--accent);">+</strong> to add content block cards (14 block types available!)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Block Type Picker Modal -->
+    <div id="block-picker-overlay" onclick="handlePickerBackdrop(event)">
+        <div class="block-picker-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h4 style="font-size:1.05rem;">Choose a Content Block</h4>
+                <button class="block-btn-icon" onclick="closeBlockPicker()"><i class="fas fa-times"></i></button>
+            </div>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">Select content block type to add to your post</p>
+            
+            <div class="picker-grid">
+                <button class="picker-item-btn" onclick="pickBlockType('title')">
+                    <i class="fas fa-heading"></i>
+                    <span>Title / Heading</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('image')">
+                    <i class="fas fa-image"></i>
+                    <span>Image</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('text')">
+                    <i class="fas fa-paragraph"></i>
+                    <span>Text</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('highlight')">
+                    <i class="fas fa-highlighter"></i>
+                    <span>Highlight Text</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('step')">
+                    <i class="fas fa-list-ol"></i>
+                    <span>Steps & Description</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('custom_button')">
+                    <i class="fas fa-hand-pointer"></i>
+                    <span>Custom Link Button</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('code')">
+                    <i class="fas fa-code"></i>
+                    <span>Code</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('link')">
+                    <i class="fas fa-link"></i>
+                    <span>Link</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('callout')">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Callout Box</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('list')">
+                    <i class="fas fa-list-check"></i>
+                    <span>Bullet List</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('tags')">
+                    <i class="fas fa-tags"></i>
+                    <span>Tech Badges</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('video')">
+                    <i class="fas fa-video"></i>
+                    <span>Video Embed</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('wiring')">
+                    <i class="fas fa-plug-circle-bolt"></i>
+                    <span>Hardware Wiring Connection</span>
+                </button>
+                <button class="picker-item-btn" onclick="pickBlockType('divider')">
+                    <i class="fas fa-minus"></i>
+                    <span>Divider Line</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let firebaseDb = null;
+        let ADMIN_EMAIL = window.ENV?.ADMIN_EMAIL || "prasanth.kum22@gmail.com";
+        let ADMIN_PASSWORD = window.ENV?.ADMIN_PASSWORD || "prasanth";
+
+        // Initialize App
+        document.addEventListener("DOMContentLoaded", () => {
+            initFirebase();
+            if (sessionStorage.getItem("admin_auth") === "true") {
+                showDashboard();
+            }
+        });
+
+        function initFirebase() {
+            if (typeof firebase !== 'undefined' && window.ENV?.FIREBASE_CONFIG) {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(window.ENV.FIREBASE_CONFIG);
+                    }
+                    firebaseDb = firebase.firestore();
+                    console.log("🔥 Admin Firebase Initialized!");
+                } catch (e) {
+                    console.warn("Admin Firebase init warning:", e);
+                }
+            }
+        }
+
+        /* ── Auth & Dashboard ───────────────────── */
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById("admin-email").value.trim();
+            const password = document.getElementById("admin-password").value;
+            if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+                sessionStorage.setItem("admin_auth", "true");
+                showDashboard();
+                showToast("✨ Welcome to Admin Dashboard!", "success");
+            } else {
+                showToast("❌ Invalid email or password.", "error");
+            }
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem("admin_auth");
+            location.reload();
+        }
+
+        function showDashboard() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("admin-panel").style.display = "block";
+            loadMessages();
+            loadBlogs();
+            loadProjects();
+            loadCertificates();
+            loadIdeas();
+            loadSiteProfileForm();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            const btn = document.querySelector(`.tab-btn[onclick*='${tabId}']`);
+            if (btn) btn.classList.add("active");
+            const content = document.getElementById(`tab-${tabId}`);
+            if (content) content.classList.add("active");
+        }
+
+        /* ── Cloudinary Image Upload ────────────── */
+        function openCloudinaryWidget(targetInputId) {
+            if (!window.cloudinary || !window.ENV?.CLOUDINARY_CLOUD_NAME) {
+                showToast("⚠️ Cloudinary config missing.", "error");
+                return;
+            }
+            const widget = cloudinary.createUploadWidget({
+                cloudName: window.ENV.CLOUDINARY_CLOUD_NAME,
+                uploadPreset: window.ENV.CLOUDINARY_PRESET || "unsigned",
+                sources: ["local", "url", "camera"],
+                multiple: false
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    document.getElementById(targetInputId).value = result.info.secure_url;
+                    showToast("✅ Image uploaded successfully!", "success");
+                }
+            });
+            widget.open();
+        }
+
+        /* ── Messages System ────────────────────── */
+        async function loadMessages() {
+            const grid = document.getElementById("messages-grid");
+            if (!grid) return;
+            let msgs = [];
+
+            if (firebaseDb) {
+                try {
+                    const snap = await firebaseDb.collection("messages").get();
+                    if (!snap.empty) {
+                        msgs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    }
+                } catch (e) {
+                    console.warn("Firestore fetch messages warning:", e);
+                }
+            }
+
+            msgs = sortItemsByNewest(msgs);
+            window.allMessages = msgs;
+            const badge = document.getElementById("msg-count-badge");
+            if (badge) badge.textContent = `${msgs.length} Messages`;
+            renderMessages();
+        }
+
+        function renderMessages() {
+            const grid = document.getElementById("messages-grid");
+            const query = (document.getElementById("msg-search")?.value || "").toLowerCase();
+            const msgs = (window.allMessages || []).filter(m => (m.fullname || m.name || '').toLowerCase().includes(query) || (m.email || '').toLowerCase().includes(query) || (m.message || '').toLowerCase().includes(query));
+            
+            if (msgs.length === 0) {
+                grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;">No messages found.</p>';
+                return;
+            }
+            grid.innerHTML = msgs.map(m => `
+                <div class="msg-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                        <strong>${escHtml(m.fullname || m.name || 'Visitor')}</strong>
+                        <span style="font-size:0.75rem;color:var(--text-muted);">${new Date(m.created_at || Date.now()).toLocaleDateString()}</span>
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--accent-light);margin-bottom:8px;">${escHtml(m.email || '')}</div>
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;white-space:pre-wrap;">${escHtml(m.message || '')}</p>
+                    <button class="btn-del" onclick="deleteMessage('${m.id}')"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteMessage(id) {
+            if (firebaseDb) {
+                try {
+                    await firebaseDb.collection("messages").doc(String(id)).delete();
+                    showToast("Deleted message from Firebase", "success");
+                } catch (e) {
+                    console.warn("Firestore delete message error:", e);
+                    showToast("❌ Delete failed", "error");
+                }
+            }
+            loadMessages();
+        }
+
+        /* ══════════════════════════════════════
+           UNIVERSAL NOTION CMS BUILDER FOR ALL 4 SECTIONS
+        ══════════════════════════════════════ */
+        let currentCmsType = 'idea'; // 'blog' | 'project' | 'certificate' | 'idea'
+        let currentEditIdeaId = null;
+        let ideaBlocks = [];
+        let insertAtIndex = null;
+
+        const CMS_STORAGE_KEYS = {
+            blog: 'portfolio_blogs',
+            project: 'portfolio_projects',
+            certificate: 'portfolio_certificates',
+            idea: 'project_ideas'
+        };
+
+        function getStorageKey(type = currentCmsType) {
+            return CMS_STORAGE_KEYS[type] || 'project_ideas';
+        }
+
+        function loadBlogs() { loadCmsGrid('blog', 'blogs-grid', 'No blog posts published yet. Click <strong>"+ New Blog Post"</strong> to create your first post!'); }
+        function loadProjects() { loadCmsGrid('project', 'projects-grid', 'No projects published yet. Click <strong>"+ New Project"</strong> to create your first project!'); }
+        function loadCertificates() { loadCmsGrid('certificate', 'certificates-grid', 'No certificates published yet. Click <strong>"+ New Certificate"</strong> to add your first certificate!'); }
+        function loadIdeas() { loadCmsGrid('idea', 'ideas-grid', 'No project guides published yet. Click <strong>"+ New Project Guide"</strong> to create your first post!'); }
+
+        async function loadCmsGrid(type, gridId, emptyText) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+            const primaryKey = getStorageKey(type);
+            const simpleKey = type === 'idea' ? 'ideas' : (type + 's');
+            let posts = [];
+
+            if (firebaseDb) {
+                try {
+                    let snap = await firebaseDb.collection(primaryKey).get();
+                    if (snap.empty) {
+                        snap = await firebaseDb.collection(simpleKey).get();
+                    }
+                    if (!snap.empty) {
+                        posts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    }
+                } catch (e) {
+                    console.warn(`Firestore fetch error:`, e);
+                    if (e.message && e.message.includes('permission')) {
+                        showToast("⚠️ Firebase Rule Notice: Go to Firebase Console -> Firestore Database -> Rules and set allow read, write: if true;", "warning");
+                    }
+                }
+            }
+
+            renderCmsCardGrid(type, gridId, posts, emptyText);
+        }
+
+        function sortItemsByNewest(items) {
+            if (!Array.isArray(items)) return [];
+            return items.sort((a, b) => {
+                const getTs = (x) => {
+                    if (!x) return 0;
+                    if (x.created_at) return new Date(x.created_at).getTime();
+                    if (x.date) return new Date(x.date).getTime();
+                    if (x.id && typeof x.id === 'string' && x.id.includes('_')) {
+                        const parts = x.id.split('_');
+                        const last = parseInt(parts[parts.length - 1]);
+                        if (!isNaN(last) && last > 1000000000) return last;
+                    }
+                    return 0;
+                };
+                return getTs(b) - getTs(a);
+            });
+        }
+
+        function renderCmsCardGrid(type, gridId, posts, emptyText) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+
+            posts = sortItemsByNewest(posts);
+
+            if (type === 'blog') window.allBlogs = posts;
+            else if (type === 'project') window.allProjects = posts;
+            else if (type === 'certificate') window.allCertificates = posts;
+            else if (type === 'idea') window.allIdeas = posts;
+
+            if (!posts || posts.length === 0) {
+                grid.innerHTML = `<p style="color:var(--text-muted);grid-column:1/-1;">${emptyText}</p>`;
+                return;
+            }
+
+            grid.innerHTML = posts.map(p => {
+                const textBlock = (p.blocks || []).find(b => b.type === 'text' || b.type === 'highlight');
+                const desc = textBlock ? textBlock.content : (p.text || p.description || '');
+                const previewDesc = desc ? (desc.slice(0, 90) + (desc.length > 90 ? '…' : '')) : '';
+                const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : (p.date || 'Recent');
+                const cnt = (p.blocks || []).length || 1;
+                const safeId = String(p.id).replace(/'/g, "\\'");
+
+                return `<div class="item-card">
+                    <h4 style="margin-bottom:6px;">${escHtml(p.title || 'Untitled')}</h4>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;"><i class="fas fa-calendar-alt"></i> ${dateStr} • <i class="fas fa-cubes"></i> ${cnt} block${cnt !== 1 ? 's' : ''}</p>
+                    ${previewDesc ? `<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">${escHtml(previewDesc)}</p>` : ''}
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn-secondary" onclick="openCmsEditor('${type}', '${safeId}')"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn-del" onclick="deleteCmsPost('${type}', '${safeId}')"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function openCmsEditor(type = 'idea', postId = null) {
+            currentCmsType = type;
+            currentEditIdeaId = postId;
+
+            const overlay = document.getElementById("project-idea-editor");
+            const titleInput = document.getElementById("idea-post-title");
+            const coverInput = document.getElementById("cms-cover-image");
+            const headerTitle = document.getElementById("cms-editor-header-title");
+            const backText = document.getElementById("cms-editor-back-text");
+
+            const typeMeta = {
+                blog: { title: '📝 Blog Post Editor', back: 'Back to Blogs', placeholder: 'Title your blog post…' },
+                project: { title: '🚀 Project Editor', back: 'Back to Projects', placeholder: 'Title your project…' },
+                certificate: { title: '📜 Certificate Editor', back: 'Back to Certificates', placeholder: 'Title your certificate…' },
+                idea: { title: '💡 Project Guide Editor', back: 'Back to Guides', placeholder: 'Title your project guide…' }
+            };
+
+            const meta = typeMeta[type] || typeMeta.idea;
+            if (headerTitle) headerTitle.innerHTML = meta.title;
+            if (backText) backText.textContent = meta.back;
+            if (titleInput) titleInput.placeholder = meta.placeholder;
+
+            const primaryKey = getStorageKey(type);
+            const simpleKey = type === 'idea' ? 'ideas' : (type + 's');
+            if (postId) {
+                let post = null;
+                let list = [];
+                if (type === 'blog') list = window.allBlogs || [];
+                else if (type === 'project') list = window.allProjects || [];
+                else if (type === 'certificate') list = window.allCertificates || [];
+                else if (type === 'idea') list = window.allIdeas || [];
+
+                post = list.find(p => String(p.id) === String(postId));
+
+                if (!post && firebaseDb) {
+                    try {
+                        let snap = await firebaseDb.collection(primaryKey).doc(String(postId)).get();
+                        if (!snap.exists) snap = await firebaseDb.collection(simpleKey).doc(String(postId)).get();
+                        if (snap.exists) post = { id: snap.id, ...snap.data() };
+                    } catch (e) {}
+                }
+
+                if (post) {
+                    titleInput.value = post.title || '';
+                    if (coverInput) coverInput.value = post.image || '';
+                    if (post.blocks && post.blocks.length > 0) {
+                        ideaBlocks = JSON.parse(JSON.stringify(post.blocks));
+                    } else {
+                        ideaBlocks = [{ type: 'title', level: 'h2', content: post.title || '' }];
+                        if (post.image) ideaBlocks.push({ type: 'image', url: post.image });
+                        if (post.text || post.description) ideaBlocks.push({ type: 'text', content: post.text || post.description });
+                        if (post.link) ideaBlocks.push({ type: 'custom_button', text: 'Open Link', url: post.link, style: 'purple', icon: 'fa-external-link-alt' });
+                    }
+                }
+            } else {
+                titleInput.value = '';
+                if (coverInput) coverInput.value = '';
+                ideaBlocks = [
+                    { type: 'title', level: 'h2', content: '' },
+                    { type: 'text', content: '' }
+                ];
+            }
+
+            renderBlocksCanvas();
+            overlay.style.display = "flex";
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeCmsEditor() {
+            const overlay = document.getElementById("project-idea-editor");
+            overlay.style.display = "none";
+            document.body.style.overflow = "";
+        }
+
+        function openIdeaEditor(postId = null) { openCmsEditor('idea', postId); }
+        function closeIdeaEditor() { closeCmsEditor(); }
+        function postProjectIdea() { postCmsContent(); }
+        function deleteIdeaPost(id) { deleteCmsPost('idea', id); }
+
+        async function postCmsContent() {
+            try {
+                const titleInput = document.getElementById("idea-post-title");
+                const coverInput = document.getElementById("cms-cover-image");
+                const title = titleInput ? titleInput.value.trim() : '';
+                const coverUrl = coverInput ? coverInput.value.trim() : '';
+
+                if (!title) {
+                    showToast("⚠️ Please enter a title for your post.", "error");
+                    if (titleInput) titleInput.focus();
+                    return;
+                }
+
+                if (!ideaBlocks || ideaBlocks.length === 0) {
+                    showToast("⚠️ Please add at least one content block.", "error");
+                    return;
+                }
+
+                const primaryKey = getStorageKey(currentCmsType);
+                const simpleKey = currentCmsType === 'idea' ? 'ideas' : (currentCmsType + 's');
+                const targetId = currentEditIdeaId || (currentCmsType.slice(0, 4) + '_' + Date.now());
+                const cleanBlocks = JSON.parse(JSON.stringify(ideaBlocks));
+
+                const postObj = {
+                    id: String(targetId),
+                    title: title,
+                    image: coverUrl,
+                    created_at: new Date().toISOString(),
+                    blocks: cleanBlocks
+                };
+
+                if (firebaseDb) {
+                    try {
+                        const firestorePayload = JSON.parse(JSON.stringify(postObj));
+                        await firebaseDb.collection(primaryKey).doc(String(targetId)).set(firestorePayload);
+                        await firebaseDb.collection(simpleKey).doc(String(targetId)).set(firestorePayload);
+                        showToast("✨ Published to Firebase!", "success");
+                        closeCmsEditor();
+
+                        if (currentCmsType === 'blog') loadBlogs();
+                        else if (currentCmsType === 'project') loadProjects();
+                        else if (currentCmsType === 'certificate') loadCertificates();
+                        else loadIdeas();
+                    } catch (e) {
+                        console.error("Firebase save error:", e);
+                        showToast("❌ Save failed: " + (e.message || e), "error");
+                    }
+                } else {
+                    showToast("⚠️ Database not connected.", "error");
+                }
+            } catch (err) {
+                console.error("Error publishing post:", err);
+                showToast("❌ Save failed: " + (err.message || err), "error");
+            }
+        }
+
+        async function deleteCmsPost(type, id) {
+            const primaryKey = getStorageKey(type);
+            const simpleKey = type === 'idea' ? 'ideas' : (type + 's');
+            const strId = String(id);
+
+            if (firebaseDb) {
+                try {
+                    await firebaseDb.collection(primaryKey).doc(strId).delete();
+                    await firebaseDb.collection(simpleKey).doc(strId).delete();
+                    showToast("🗑️ Deleted from Database!", "success");
+                } catch (e) {
+                    console.warn("Firebase delete error:", e);
+                    showToast("❌ Delete failed: " + (e.message || e), "error");
+                }
+            }
+
+            if (type === 'blog') loadBlogs();
+            else if (type === 'project') loadProjects();
+            else if (type === 'certificate') loadCertificates();
+            else loadIdeas();
+        }
+
+        function renderBlocksCanvas() {
+            const canvas = document.getElementById("idea-blocks-canvas");
+            if (!canvas) return;
+
+            if (ideaBlocks.length === 0) {
+                canvas.innerHTML = `
+                    <div style="text-align:center;padding:40px 20px;color:var(--text-muted);">
+                        <i class="fas fa-cubes" style="font-size:2.4rem;margin-bottom:12px;opacity:0.4;display:block;"></i>
+                        <p>No blocks added yet. Click the <strong>+</strong> button below to add your first block!</p>
+                    </div>`;
+                return;
+            }
+
+            canvas.innerHTML = ideaBlocks.map((block, idx) => {
+                let blockHtml = '';
+
+                if (block.type === 'title') {
+                    const lvl = block.level || 'h2';
+                    blockHtml = `
+                        <div class="heading-pill-btns">
+                            <button type="button" class="heading-pill ${lvl === 'h1' ? 'active' : ''}" onclick="setHeadingLevel(${idx}, 'h1')">H1</button>
+                            <button type="button" class="heading-pill ${lvl === 'h2' ? 'active' : ''}" onclick="setHeadingLevel(${idx}, 'h2')">H2</button>
+                            <button type="button" class="heading-pill ${lvl === 'h3' ? 'active' : ''}" onclick="setHeadingLevel(${idx}, 'h3')">H3</button>
+                            <button type="button" class="heading-pill ${lvl === 'h4' ? 'active' : ''}" onclick="setHeadingLevel(${idx}, 'h4')">H4</button>
+                        </div>
+                        <input type="text" value="${escHtml(block.content || '')}" placeholder="Heading text…" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;font-size:1.2rem;font-weight:700;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                    `;
+                } else if (block.type === 'image') {
+                    const preview = block.url ? `<div style="margin-top:10px;border-radius:12px;overflow:hidden;max-height:220px;"><img src="${escHtml(block.url)}" style="width:100%;height:100%;object-fit:cover;"></div>` : '';
+                    blockHtml = `
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="url" id="img_input_${idx}" value="${escHtml(block.url || '')}" placeholder="Image URL (e.g. https://...)" oninput="updateBlockUrl(${idx}, this.value)" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                            <button type="button" class="btn-secondary" onclick="openCloudinaryWidgetForBlock(${idx})"><i class="fas fa-upload"></i> Upload</button>
+                        </div>
+                        ${preview}
+                    `;
+                } else if (block.type === 'text') {
+                    blockHtml = `
+                        <textarea placeholder="Write paragraph text or description…" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;min-height:90px;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-family:inherit;font-size:0.9rem;outline:none;resize:vertical;">${escHtml(block.content || '')}</textarea>
+                    `;
+                } else if (block.type === 'code') {
+                    const lang = block.lang || 'javascript';
+                    blockHtml = `
+                        <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+                            <label style="font-size:0.78rem;color:var(--text-muted);font-weight:600;">Language:</label>
+                            <select onchange="updateBlockLang(${idx}, this.value)" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.82rem;outline:none;">
+                                <option value="javascript" ${lang === 'javascript' ? 'selected' : ''}>JavaScript</option>
+                                <option value="html" ${lang === 'html' ? 'selected' : ''}>HTML / CSS</option>
+                                <option value="python" ${lang === 'python' ? 'selected' : ''}>Python</option>
+                                <option value="sql" ${lang === 'sql' ? 'selected' : ''}>SQL</option>
+                                <option value="cpp" ${lang === 'cpp' ? 'selected' : ''}>C++ / C#</option>
+                                <option value="json" ${lang === 'json' ? 'selected' : ''}>JSON</option>
+                            </select>
+                        </div>
+                        <textarea placeholder="// Code snippet…" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;min-height:240px;padding:12px;border-radius:10px;border:1px solid var(--border);background:#0f172a;color:#38bdf8;font-family:monospace;font-size:0.85rem;outline:none;resize:vertical;line-height:1.5;">${escHtml(block.content || '')}</textarea>
+                    `;
+                } else if (block.type === 'link') {
+                    blockHtml = `
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <input type="url" value="${escHtml(block.url || '')}" placeholder="Destination URL (https://...)" oninput="updateBlockUrl(${idx}, this.value)" style="padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                            <input type="text" value="${escHtml(block.text || '')}" placeholder="Link Text Label (e.g. View GitHub Repo)" oninput="updateBlockLinkText(${idx}, this.value)" style="padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                        </div>
+                    `;
+                } else if (block.type === 'callout') {
+                    const st = block.style || 'info';
+                    blockHtml = `
+                        <div class="heading-pill-btns">
+                            <button type="button" class="heading-pill ${st === 'info' ? 'active' : ''}" onclick="setCalloutStyle(${idx}, 'info')"><i class="fas fa-circle-info"></i> Info</button>
+                            <button type="button" class="heading-pill ${st === 'tip' ? 'active' : ''}" onclick="setCalloutStyle(${idx}, 'tip')"><i class="fas fa-lightbulb"></i> Tip</button>
+                            <button type="button" class="heading-pill ${st === 'warning' ? 'active' : ''}" onclick="setCalloutStyle(${idx}, 'warning')"><i class="fas fa-triangle-exclamation"></i> Warning</button>
+                        </div>
+                        <textarea placeholder="Callout box note or highlight text…" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;min-height:75px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;resize:vertical;">${escHtml(block.content || '')}</textarea>
+                    `;
+                } else if (block.type === 'list') {
+                    blockHtml = `
+                        <label style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;display:block;">List Items (one item per line):</label>
+                        <textarea placeholder="Feature item 1&#10;Feature item 2&#10;Feature item 3" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;min-height:85px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;resize:vertical;">${escHtml(block.content || '')}</textarea>
+                    `;
+                } else if (block.type === 'tags') {
+                    blockHtml = `
+                        <label style="font-size:0.78rem;color:var(--text-muted);margin-bottom:4px;display:block;">Tech Badges (comma separated tags):</label>
+                        <input type="text" value="${escHtml(block.content || '')}" placeholder="React, Node.js, Supabase, Tailwind" oninput="updateBlockContent(${idx}, this.value)" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                    `;
+                } else if (block.type === 'video') {
+                    blockHtml = `
+                        <input type="url" value="${escHtml(block.url || '')}" placeholder="YouTube / MP4 Video URL (https://www.youtube.com/watch?v=...)" oninput="updateBlockUrl(${idx}, this.value)" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                    `;
+                } else if (block.type === 'divider') {
+                    blockHtml = `
+                        <div style="padding:8px 0;text-align:center;color:var(--text-muted);font-size:0.8rem;border-top:1px dashed var(--border);">── Horizontal Section Divider Line ──</div>
+                    `;
+                } else if (block.type === 'highlight') {
+                    const col = block.color || 'yellow';
+                    const st = block.style || 'marker';
+                    blockHtml = `
+                        <div style="margin-bottom:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Color Scheme:</label>
+                                <div class="heading-pill-btns">
+                                    <button type="button" class="heading-pill ${col === 'yellow' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'yellow')">🟨 Yellow</button>
+                                    <button type="button" class="heading-pill ${col === 'purple' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'purple')">🟪 Purple</button>
+                                    <button type="button" class="heading-pill ${col === 'green' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'green')">🟩 Green</button>
+                                    <button type="button" class="heading-pill ${col === 'blue' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'blue')">🟦 Blue</button>
+                                    <button type="button" class="heading-pill ${col === 'pink' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'pink')">🩷 Pink</button>
+                                    <button type="button" class="heading-pill ${col === 'orange' ? 'active' : ''}" onclick="setHighlightColor(${idx}, 'orange')">🟧 Orange</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Highlight Style:</label>
+                                <div class="heading-pill-btns">
+                                    <button type="button" class="heading-pill ${st === 'marker' ? 'active' : ''}" onclick="setHighlightStyle(${idx}, 'marker')">Marker</button>
+                                    <button type="button" class="heading-pill ${st === 'glow' ? 'active' : ''}" onclick="setHighlightStyle(${idx}, 'glow')">Glow Box</button>
+                                    <button type="button" class="heading-pill ${st === 'badge' ? 'active' : ''}" onclick="setHighlightStyle(${idx}, 'badge')">Badge</button>
+                                    <button type="button" class="heading-pill ${st === 'pill' ? 'active' : ''}" onclick="setHighlightStyle(${idx}, 'pill')">Pill</button>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea placeholder="Enter text to highlight..." oninput="updateBlockContent(${idx}, this.value)" style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;resize:vertical;">${escHtml(block.content || '')}</textarea>
+                    `;
+                } else if (block.type === 'step') {
+                    const steps = block.steps || [];
+                    const stepsHtml = steps.map((s, stepIdx) => `
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-size:0.8rem;font-weight:700;color:var(--accent);display:inline-flex;align-items:center;gap:6px;">
+                                    <span style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:0.72rem;">${stepIdx + 1}</span>
+                                    Step ${stepIdx + 1}
+                                </span>
+                                <div style="display:flex;gap:4px;">
+                                    ${stepIdx > 0 ? `<button type="button" class="block-btn-icon" onclick="moveStepItem(${idx}, ${stepIdx}, -1)" title="Move up"><i class="fas fa-arrow-up"></i></button>` : ''}
+                                    ${stepIdx < steps.length - 1 ? `<button type="button" class="block-btn-icon" onclick="moveStepItem(${idx}, ${stepIdx}, 1)" title="Move down"><i class="fas fa-arrow-down"></i></button>` : ''}
+                                    <button type="button" class="block-btn-icon del" onclick="removeStepItem(${idx}, ${stepIdx})" title="Delete step"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <input type="text" value="${escHtml(s.title || '')}" placeholder="Step Title (e.g. Step 1: Initial Setup)" oninput="updateStepItemTitle(${idx}, ${stepIdx}, this.value)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-weight:600;font-size:0.88rem;outline:none;margin-bottom:6px;">
+                            <textarea placeholder="Step description details..." oninput="updateStepItemDesc(${idx}, ${stepIdx}, this.value)" style="width:100%;min-height:60px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.83rem;outline:none;resize:vertical;">${escHtml(s.desc || s.description || '')}</textarea>
+                        </div>
+                    `).join('');
+
+                    blockHtml = `
+                        <div style="margin-bottom:8px;">
+                            <div style="margin-bottom:12px;padding:10px 12px;background:rgba(168,85,247,0.08);border:1px dashed rgba(168,85,247,0.3);border-radius:10px;">
+                                <label style="font-size:0.75rem;font-weight:700;color:#c084fc;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                    <i class="fas fa-wand-magic-sparkles"></i> AI Quick Paste Steps List (Only fills this Step block):
+                                </label>
+                                <div style="display:flex;gap:8px;">
+                                    <input type="text" id="ai-step-input-${idx}" placeholder="Paste step lines e.g.: 1. Setup Arduino 2. Connect OLED 3. Test sketch" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.82rem;outline:none;">
+                                    <button type="button" class="btn-secondary" onclick="aiAutoFillStepBlock(${idx})" style="background:linear-gradient(135deg, #a855f7, #ec4899);color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:600;font-size:0.8rem;cursor:pointer;white-space:nowrap;">
+                                        ✨ Fill Steps
+                                    </button>
+                                </div>
+                            </div>
+                            <label style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;display:block;">Steps & Description List:</label>
+                            ${stepsHtml}
+                            <button type="button" class="btn-secondary" onclick="addStepItem(${idx})" style="font-size:0.8rem;padding:6px 14px;"><i class="fas fa-plus"></i> Add Step</button>
+                        </div>
+                    `;
+                } else if (block.type === 'custom_button') {
+                    const btnText = block.text || 'Open Link';
+                    const btnUrl = block.url || '';
+                    const btnStyle = block.style || 'purple';
+                    const btnIcon = block.icon || 'fa-external-link-alt';
+                    const btnAlign = block.align || 'left';
+                    const btnTarget = block.target || '_blank';
+
+                    blockHtml = `
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Button Label / Text:</label>
+                                <input type="text" value="${escHtml(btnText)}" placeholder="e.g. Open Live Demo" oninput="updateCustomButton(${idx}, 'text', this.value)" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Destination URL:</label>
+                                <input type="url" value="${escHtml(btnUrl)}" placeholder="https://..." oninput="updateCustomButton(${idx}, 'url', this.value)" style="width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Theme Style:</label>
+                                <select onchange="updateCustomButton(${idx}, 'style', this.value)" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;font-size:0.83rem;">
+                                    <option value="purple" ${btnStyle === 'purple' ? 'selected' : ''}>💜 Purple Glow</option>
+                                    <option value="gradient" ${btnStyle === 'gradient' ? 'selected' : ''}>🩷 Pink Gradient</option>
+                                    <option value="blue" ${btnStyle === 'blue' ? 'selected' : ''}>💙 Electric Blue</option>
+                                    <option value="green" ${btnStyle === 'green' ? 'selected' : ''}>💚 Emerald Green</option>
+                                    <option value="dark" ${btnStyle === 'dark' ? 'selected' : ''}>🖤 Dark Obsidian</option>
+                                    <option value="outline" ${btnStyle === 'outline' ? 'selected' : ''}>🤍 Purple Outline</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Button Icon:</label>
+                                <select onchange="updateCustomButton(${idx}, 'icon', this.value)" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;font-size:0.83rem;">
+                                    <option value="fa-external-link-alt" ${btnIcon === 'fa-external-link-alt' ? 'selected' : ''}>🔗 External Link</option>
+                                    <option value="fa-rocket" ${btnIcon === 'fa-rocket' ? 'selected' : ''}>🚀 Rocket / Launch</option>
+                                    <option value="fa-github" ${btnIcon === 'fa-github' ? 'selected' : ''}>💻 GitHub Repo</option>
+                                    <option value="fa-play" ${btnIcon === 'fa-play' ? 'selected' : ''}>▶️ Live Demo</option>
+                                    <option value="fa-eye" ${btnIcon === 'fa-eye' ? 'selected' : ''}>👁️ Preview</option>
+                                    <option value="fa-download" ${btnIcon === 'fa-download' ? 'selected' : ''}>📥 Download</option>
+                                    <option value="fa-code" ${btnIcon === 'fa-code' ? 'selected' : ''}>⚡ Source Code</option>
+                                    <option value="fa-paper-plane" ${btnIcon === 'fa-paper-plane' ? 'selected' : ''}>✈️ Send / Open</option>
+                                    <option value="fa-arrow-right" ${btnIcon === 'fa-arrow-right' ? 'selected' : ''}>➔ Arrow Right</option>
+                                    <option value="fa-star" ${btnIcon === 'fa-star' ? 'selected' : ''}>⭐ Star Project</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">Alignment:</label>
+                                <select onchange="updateCustomButton(${idx}, 'align', this.value)" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);outline:none;font-size:0.83rem;">
+                                    <option value="left" ${btnAlign === 'left' ? 'selected' : ''}>Left Align</option>
+                                    <option value="center" ${btnAlign === 'center' ? 'selected' : ''}>Center Align</option>
+                                    <option value="right" ${btnAlign === 'right' ? 'selected' : ''}>Right Align</option>
+                                    <option value="full" ${btnAlign === 'full' ? 'selected' : ''}>Full Width</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
+                            <label style="font-size:0.8rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                <input type="checkbox" ${btnTarget === '_blank' ? 'checked' : ''} onchange="updateCustomButton(${idx}, 'target', this.checked ? '_blank' : '_self')"> Open link in new tab
+                            </label>
+                        </div>
+                    `;
+                } else if (block.type === 'wiring') {
+                    const conns = block.connections || [];
+                    const connsHtml = conns.map((c, connIdx) => `
+                        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                <span style="font-size:0.8rem;font-weight:700;color:var(--accent);display:inline-flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-plug-circle-bolt"></i> Connection #${connIdx + 1}
+                                </span>
+                                <div style="display:flex;gap:4px;">
+                                    ${connIdx > 0 ? `<button type="button" class="block-btn-icon" onclick="moveWiringItem(${idx}, ${connIdx}, -1)" title="Move up"><i class="fas fa-arrow-up"></i></button>` : ''}
+                                    ${connIdx < conns.length - 1 ? `<button type="button" class="block-btn-icon" onclick="moveWiringItem(${idx}, ${connIdx}, 1)" title="Move down"><i class="fas fa-arrow-down"></i></button>` : ''}
+                                    <button type="button" class="block-btn-icon del" onclick="removeWiringItem(${idx}, ${connIdx})" title="Delete connection"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <div>
+                                    <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">From Pin / Component:</label>
+                                    <input type="text" value="${escHtml(c.from || '')}" placeholder="e.g. ESP32 Pin GPIO 21 (SDA)" oninput="updateWiringItem(${idx}, ${connIdx}, 'from', this.value)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.85rem;outline:none;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;font-weight:600;">To Pin / Component:</label>
+                                    <input type="text" value="${escHtml(c.to || '')}" placeholder="e.g. OLED Display Pin SDA" oninput="updateWiringItem(${idx}, ${connIdx}, 'to', this.value)" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.85rem;outline:none;">
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    blockHtml = `
+                        <div style="margin-bottom:10px;">
+                            <div style="margin-bottom:12px;padding:10px 12px;background:rgba(168,85,247,0.08);border:1px dashed rgba(168,85,247,0.3);border-radius:10px;">
+                                <label style="font-size:0.75rem;font-weight:700;color:#c084fc;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                    <i class="fas fa-wand-magic-sparkles"></i> AI Quick Paste Wiring Pinouts / Markdown Tables:
+                                </label>
+                                <div style="display:flex;gap:8px;align-items:flex-end;">
+                                    <textarea id="ai-wiring-input-${idx}" placeholder="Paste markdown table or pinouts e.g.:&#10;| ESP32 | LED |&#10;| GPIO 2 | LED Anode (+) |&#10;| GND | LED Cathode (-) through 220Ω |" style="flex:1;height:65px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.82rem;outline:none;resize:vertical;font-family:inherit;"></textarea>
+                                    <button type="button" class="btn-secondary" onclick="aiAutoFillWiringBlock(${idx})" style="background:linear-gradient(135deg, #a855f7, #ec4899);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;font-size:0.8rem;cursor:pointer;white-space:nowrap;height:38px;">
+                                        ✨ Fill Wiring
+                                    </button>
+                                </div>
+                            </div>
+                            <label style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;display:block;">Wiring Section Header Title:</label>
+                            <input type="text" value="${escHtml(block.title || 'Hardware Wiring Connections')}" placeholder="e.g. ESP32 & OLED Pin Connections" oninput="updateWiringTitle(${idx}, this.value)" style="width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-weight:600;outline:none;margin-bottom:12px;">
+                            
+                            <label style="font-size:0.78rem;color:var(--text-muted);font-weight:600;margin-bottom:6px;display:block;">Pinout & Wiring Connection Table:</label>
+                            ${connsHtml}
+                            <button type="button" class="btn-secondary" onclick="addWiringItem(${idx})" style="font-size:0.8rem;padding:6px 14px;"><i class="fas fa-plus"></i> Add Wiring Connection Row</button>
+                        </div>
+                    `;
+                }
+
+                const iconMap = { 
+                    title: 'fa-heading', image: 'fa-image', text: 'fa-paragraph', code: 'fa-code', 
+                    link: 'fa-link', callout: 'fa-lightbulb', list: 'fa-list-check', tags: 'fa-tags', 
+                    video: 'fa-video', divider: 'fa-minus', highlight: 'fa-highlighter',
+                    step: 'fa-list-ol', custom_button: 'fa-hand-pointer', wiring: 'fa-plug-circle-bolt'
+                };
+
+                return `
+                    <div class="editor-block-card">
+                        <div class="block-header">
+                            <div class="block-type-tag">
+                                <i class="fas ${iconMap[block.type] || 'fa-cube'}"></i> ${block.type} Block
+                            </div>
+                            <div class="block-controls">
+                                ${idx > 0 ? `<button class="block-btn-icon" onclick="moveBlock(${idx}, -1)" title="Move up"><i class="fas fa-arrow-up"></i></button>` : ''}
+                                ${idx < ideaBlocks.length - 1 ? `<button class="block-btn-icon" onclick="moveBlock(${idx}, 1)" title="Move down"><i class="fas fa-arrow-down"></i></button>` : ''}
+                                <button class="block-btn-icon del" onclick="removeBlock(${idx})" title="Delete block"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        ${blockHtml}
+                    </div>
+                    <div class="inline-add-sep">
+                        <button type="button" class="inline-add-btn" onclick="openBlockPicker(${idx + 1})"><i class="fas fa-plus"></i> Add block here</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openBlockPicker(atIndex = null) {
+            insertAtIndex = atIndex;
+            document.getElementById("block-picker-overlay").style.display = "flex";
+        }
+
+        function closeBlockPicker() {
+            document.getElementById("block-picker-overlay").style.display = "none";
+        }
+
+        function handlePickerBackdrop(e) {
+            if (e.target.id === "block-picker-overlay") closeBlockPicker();
+        }
+
+
+
+        function pickBlockType(type) {
+            closeBlockPicker();
+            let newBlock = { type: type, content: '' };
+            if (type === 'title') newBlock = { type: 'title', level: 'h2', content: '' };
+            else if (type === 'image') newBlock = { type: 'image', url: '' };
+            else if (type === 'text') newBlock = { type: 'text', content: '' };
+            else if (type === 'highlight') newBlock = { type: 'highlight', color: 'yellow', style: 'marker', content: '' };
+            else if (type === 'step') newBlock = { type: 'step', steps: [{ title: 'Step 1: Planning & Setup', desc: 'Describe the steps and details for this phase...' }] };
+            else if (type === 'custom_button') newBlock = { type: 'custom_button', text: 'Open Link', url: 'https://', style: 'purple', icon: 'fa-external-link-alt', align: 'left', target: '_blank' };
+            else if (type === 'code') newBlock = { type: 'code', lang: 'javascript', content: '' };
+            else if (type === 'link') newBlock = { type: 'link', url: '', text: '' };
+            else if (type === 'callout') newBlock = { type: 'callout', style: 'info', content: '' };
+            else if (type === 'list') newBlock = { type: 'list', content: '' };
+            else if (type === 'tags') newBlock = { type: 'tags', content: '' };
+            else if (type === 'video') newBlock = { type: 'video', url: '' };
+            else if (type === 'wiring') newBlock = { 
+                type: 'wiring', 
+                title: 'Hardware Pin & Wiring Connections', 
+                connections: [
+                    { from: 'Microcontroller VCC (3.3V/5V)', to: 'Module VCC' },
+                    { from: 'Microcontroller GND', to: 'Module GND' },
+                    { from: 'Microcontroller Pin D21 (SDA)', to: 'Module SDA' },
+                    { from: 'Microcontroller Pin D22 (SCL)', to: 'Module SCL' }
+                ] 
+            };
+            else if (type === 'divider') newBlock = { type: 'divider' };
+
+            if (insertAtIndex !== null && insertAtIndex >= 0 && insertAtIndex <= ideaBlocks.length) {
+                ideaBlocks.splice(insertAtIndex, 0, newBlock);
+            } else {
+                ideaBlocks.push(newBlock);
+            }
+            insertAtIndex = null;
+            renderBlocksCanvas();
+        }
+
+        function updateBlockContent(idx, val) {
+            if (ideaBlocks[idx]) ideaBlocks[idx].content = val;
+        }
+
+        function updateBlockUrl(idx, val) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].url = val;
+                renderBlocksCanvas();
+            }
+        }
+
+        function updateBlockLinkText(idx, val) {
+            if (ideaBlocks[idx]) ideaBlocks[idx].text = val;
+        }
+
+        function updateBlockLang(idx, val) {
+            if (ideaBlocks[idx]) ideaBlocks[idx].lang = val;
+        }
+
+        function setHeadingLevel(idx, level) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].level = level;
+                renderBlocksCanvas();
+            }
+        }
+
+        function setCalloutStyle(idx, style) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].style = style;
+                renderBlocksCanvas();
+            }
+        }
+
+        function setHighlightColor(idx, col) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].color = col;
+                renderBlocksCanvas();
+            }
+        }
+
+        function setHighlightStyle(idx, st) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].style = st;
+                renderBlocksCanvas();
+            }
+        }
+
+        function addStepItem(idx) {
+            if (ideaBlocks[idx]) {
+                if (!ideaBlocks[idx].steps) ideaBlocks[idx].steps = [];
+                const nextNum = ideaBlocks[idx].steps.length + 1;
+                ideaBlocks[idx].steps.push({
+                    title: `Step ${nextNum}: New Step Title`,
+                    desc: ''
+                });
+                renderBlocksCanvas();
+            }
+        }
+
+        function updateStepItemTitle(idx, stepIdx, val) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].steps && ideaBlocks[idx].steps[stepIdx]) {
+                ideaBlocks[idx].steps[stepIdx].title = val;
+            }
+        }
+
+        function updateStepItemDesc(idx, stepIdx, val) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].steps && ideaBlocks[idx].steps[stepIdx]) {
+                ideaBlocks[idx].steps[stepIdx].desc = val;
+            }
+        }
+
+        function removeStepItem(idx, stepIdx) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].steps) {
+                ideaBlocks[idx].steps.splice(stepIdx, 1);
+                renderBlocksCanvas();
+            }
+        }
+
+        function moveStepItem(idx, stepIdx, dir) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].steps) {
+                const target = stepIdx + dir;
+                if (target < 0 || target >= ideaBlocks[idx].steps.length) return;
+                const temp = ideaBlocks[idx].steps[stepIdx];
+                ideaBlocks[idx].steps[stepIdx] = ideaBlocks[idx].steps[target];
+                ideaBlocks[idx].steps[target] = temp;
+                renderBlocksCanvas();
+            }
+        }
+
+        function updateCustomButton(idx, key, val) {
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx][key] = val;
+                renderBlocksCanvas();
+            }
+        }
+
+        function aiAutoFillStepBlock(idx) {
+            const input = document.getElementById(`ai-step-input-${idx}`);
+            if (!input || !input.value.trim()) {
+                showToast("⚠️ Please paste some step text first.", "error");
+                return;
+            }
+            const rawText = input.value.trim();
+            const lines = rawText.split(/\n|;/).map(l => l.trim()).filter(Boolean);
+            const newSteps = [];
+
+            lines.forEach(line => {
+                const stepMatch = line.match(/^(?:step\s*\d+:?|\d+[\.\)]|\bphase\s*\d+:?)\s*(.*)/i);
+                const title = line;
+                const desc = stepMatch ? (stepMatch[1] || '') : '';
+                newSteps.push({ title: title, desc: desc });
+            });
+
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].steps = newSteps;
+                renderBlocksCanvas();
+                showToast(`✨ Successfully filled ${newSteps.length} step(s)!`, "success");
+            }
+        }
+
+        function aiAutoFillWiringBlock(idx) {
+            const input = document.getElementById(`ai-wiring-input-${idx}`);
+            if (!input || !input.value.trim()) {
+                showToast("⚠️ Please paste some wiring pinouts or Markdown table text first.", "error");
+                return;
+            }
+            const rawText = input.value.trim();
+            const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+            const newConns = [];
+
+            lines.forEach(line => {
+                // Ignore Markdown table divider line e.g. |---|---| or |----------|----------|
+                if (/^[|:\s\-]+$/.test(line)) return;
+
+                // Handle Markdown / Pipe Tables e.g. | **GPIO 2** | LED Anode (+) |
+                if (line.includes('|')) {
+                    const cols = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(Boolean);
+                    if (cols.length >= 2) {
+                        const isHeader = /^(from|to|pin|component|microcontroller|module|device|esp32|arduino|board)$/i.test(cols[0]) && 
+                                         /^(to|pin|component|module|device|led|sensor|display|gnd|vcc)$/i.test(cols[1]);
+                        if (!isHeader) {
+                            newConns.push({ from: cols[0], to: cols[1] });
+                            return;
+                        }
+                    }
+                }
+
+                // Handle arrow / hyphen / colon / equals / connects to
+                const connMatch = line.match(/(.+?)(?:\s*(?:->|➔|--|connects to|=|:)\s*)(.+)/i);
+                if (connMatch) {
+                    let from = connMatch[1].replace(/^(wiring|pinout|connection):?\s*/i, '').replace(/\*\*/g, '').trim();
+                    let to = connMatch[2].replace(/\*\*/g, '').trim();
+                    newConns.push({ from: from, to: to });
+                    return;
+                }
+
+                // Handle tab or multi-space separated columns
+                const spaceParts = line.split(/\s{2,}|\t/).map(s => s.replace(/\*\*/g, '').trim()).filter(Boolean);
+                if (spaceParts.length >= 2) {
+                    newConns.push({ from: spaceParts[0], to: spaceParts[1] });
+                }
+            });
+
+            if (newConns.length === 0) {
+                showToast("⚠️ Could not detect pinout pairs. Try pasting a markdown table or 'Pin A -> Pin B'", "error");
+                return;
+            }
+
+            if (ideaBlocks[idx]) {
+                ideaBlocks[idx].connections = newConns;
+                renderBlocksCanvas();
+                showToast(`✨ Successfully parsed & filled ${newConns.length} wiring connection(s)!`, "success");
+            }
+        }
+
+        function updateWiringTitle(idx, val) {
+            if (ideaBlocks[idx]) ideaBlocks[idx].title = val;
+        }
+
+        function updateWiringItem(idx, connIdx, key, val) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].connections && ideaBlocks[idx].connections[connIdx]) {
+                ideaBlocks[idx].connections[connIdx][key] = val;
+            }
+        }
+
+        function addWiringItem(idx) {
+            if (ideaBlocks[idx]) {
+                if (!ideaBlocks[idx].connections) ideaBlocks[idx].connections = [];
+                const nextNum = ideaBlocks[idx].connections.length + 1;
+                ideaBlocks[idx].connections.push({
+                    from: 'Pin / Component A',
+                    to: 'Pin / Component B'
+                });
+                renderBlocksCanvas();
+            }
+        }
+
+        function removeWiringItem(idx, connIdx) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].connections) {
+                ideaBlocks[idx].connections.splice(connIdx, 1);
+                renderBlocksCanvas();
+            }
+        }
+
+        function moveWiringItem(idx, connIdx, dir) {
+            if (ideaBlocks[idx] && ideaBlocks[idx].connections) {
+                const target = connIdx + dir;
+                if (target < 0 || target >= ideaBlocks[idx].connections.length) return;
+                const temp = ideaBlocks[idx].connections[connIdx];
+                ideaBlocks[idx].connections[connIdx] = ideaBlocks[idx].connections[target];
+                ideaBlocks[idx].connections[target] = temp;
+                renderBlocksCanvas();
+            }
+        }
+
+        function moveBlock(idx, dir) {
+            const targetIdx = idx + dir;
+            if (targetIdx < 0 || targetIdx >= ideaBlocks.length) return;
+            const temp = ideaBlocks[idx];
+            ideaBlocks[idx] = ideaBlocks[targetIdx];
+            ideaBlocks[targetIdx] = temp;
+            renderBlocksCanvas();
+        }
+
+        function removeBlock(idx) {
+            ideaBlocks.splice(idx, 1);
+            renderBlocksCanvas();
+        }
+
+        function openCloudinaryWidgetForBlock(idx) {
+            if (!window.cloudinary || !window.ENV?.CLOUDINARY_CLOUD_NAME) {
+                showToast("⚠️ Cloudinary config missing.", "error");
+                return;
+            }
+            const widget = cloudinary.createUploadWidget({
+                cloudName: window.ENV.CLOUDINARY_CLOUD_NAME,
+                uploadPreset: window.ENV.CLOUDINARY_PRESET || "unsigned",
+                sources: ["local", "url", "camera"],
+                multiple: false
+            }, (error, result) => {
+                if (!error && result && result.event === "success") {
+                    if (ideaBlocks[idx]) {
+                        ideaBlocks[idx].url = result.info.secure_url;
+                        renderBlocksCanvas();
+                    }
+                    showToast("✅ Image uploaded!", "success");
+                }
+            });
+            widget.open();
+        }
+
+        function postProjectIdea() {
+            try {
+                const titleInput = document.getElementById("idea-post-title");
+                const title = titleInput ? titleInput.value.trim() : '';
+
+                if (!title) {
+                    showToast("⚠️ Please enter a title for your project guide.", "error");
+                    if (titleInput) titleInput.focus();
+                    return;
+                }
+
+                if (!ideaBlocks || ideaBlocks.length === 0) {
+                    showToast("⚠️ Please add at least one content block.", "error");
+                    return;
+                }
+
+                let posts = [];
+                try {
+                    posts = JSON.parse(localStorage.getItem('project_ideas') || '[]');
+                } catch (e) {
+                    console.error("Error reading localStorage project_ideas:", e);
+                    posts = [];
+                }
+
+                const targetId = currentEditIdeaId || ('pi_' + Date.now());
+
+                const ideaObj = {
+                    id: targetId,
+                    title: title,
+                    created_at: new Date().toISOString(),
+                    blocks: ideaBlocks
+                };
+
+                if (currentEditIdeaId) {
+                    const index = posts.findIndex(x => x.id === currentEditIdeaId);
+                    if (index !== -1) posts[index] = ideaObj;
+                    else posts.unshift(ideaObj);
+                } else {
+                    posts.unshift(ideaObj);
+                }
+
+                localStorage.setItem('project_ideas', JSON.stringify(posts));
+                showToast("✨ Project Guide published!", "success");
+                closeIdeaEditor();
+                loadIdeas();
+            } catch (err) {
+                console.error("Error publishing project guide:", err);
+                showToast("❌ Save failed: " + (err.message || err), "error");
+            }
+        }
+
+        function deleteIdeaPost(id) {
+            let posts = JSON.parse(localStorage.getItem('project_ideas') || '[]');
+            posts = posts.filter(x => x.id !== id);
+            localStorage.setItem('project_ideas', JSON.stringify(posts));
+            showToast("Deleted project guide", "success");
+            loadIdeas();
+        }
+
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        /* ── Profile Settings System ────────────── */
+        function loadSiteProfileForm() {
+            try {
+                const saved = localStorage.getItem('portfolio_site_profile');
+                const defaultProfile = {
+                    name: "K. Prasanth",
+                    title: "Web Developer | Designer",
+                    avatar: "co-founder.jpg",
+                    email: "prasanth.kum22@gmail.com",
+                    phone: "+91 82486 78722",
+                    github: "https://github.com/prasanth781007",
+                    linkedin: "https://www.linkedin.com/in/prasanth-k-741b64381/",
+                    instagram: "https://www.instagram.com/entrepreneur_tn25?igsh=eXN3NWp0cDFwdzR5",
+                    about: "I'm a dedicated web developer with expertise in creating modern, responsive websites and web applications."
+                };
+                const profile = saved ? { ...defaultProfile, ...JSON.parse(saved) } : defaultProfile;
+
+                document.getElementById('site-profile-name').value = profile.name || '';
+                document.getElementById('site-profile-title').value = profile.title || '';
+                document.getElementById('site-profile-avatar').value = profile.avatar || '';
+                document.getElementById('site-profile-email').value = profile.email || '';
+                document.getElementById('site-profile-phone').value = profile.phone || '';
+                document.getElementById('site-profile-github').value = profile.github || '';
+                document.getElementById('site-profile-linkedin').value = profile.linkedin || '';
+                document.getElementById('site-profile-instagram').value = profile.instagram || '';
+                document.getElementById('site-profile-about').value = profile.about || '';
+            } catch (e) {
+                console.error("Error loading profile form:", e);
+            }
+        }
+
+        function handleSiteProfileSubmit(e) {
+            e.preventDefault();
+            const profile = {
+                name: document.getElementById('site-profile-name').value.trim(),
+                title: document.getElementById('site-profile-title').value.trim(),
+                avatar: document.getElementById('site-profile-avatar').value.trim(),
+                email: document.getElementById('site-profile-email').value.trim(),
+                phone: document.getElementById('site-profile-phone').value.trim(),
+                github: document.getElementById('site-profile-github').value.trim(),
+                linkedin: document.getElementById('site-profile-linkedin').value.trim(),
+                instagram: document.getElementById('site-profile-instagram').value.trim(),
+                about: document.getElementById('site-profile-about').value.trim()
+            };
+            localStorage.setItem('portfolio_site_profile', JSON.stringify(profile));
+            showToast("✨ Profile settings saved! Reflected on index.html.", "success");
+        }
+
+        /* Toast Helper */
+        let toastTimeout = null;
+        function showToast(msg, type = "success") {
+            const toast = document.getElementById("toast");
+            if (!toast) return;
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toast.textContent = msg;
+            toast.className = `show ${type}`;
+            const duration = type === "error" ? 5000 : 3200;
+            toastTimeout = setTimeout(() => { toast.className = ""; }, duration);
+        }
+    </script>
+</body>
+
+</html>
