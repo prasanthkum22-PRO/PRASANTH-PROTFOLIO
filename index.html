@@ -356,16 +356,76 @@
                     <div class="skills-header">
                         <h3 class="h3 skills-title">My Skills</h3>
                         <div class="skills-filter-nav">
-                            <button class="skill-filter-btn active" data-skill-cat="all" onclick="filterSkills('all', this)">All</button>
-                            <button class="skill-filter-btn" data-skill-cat="frontend" onclick="filterSkills('frontend', this)">Frontend</button>
-                            <button class="skill-filter-btn" data-skill-cat="languages" onclick="filterSkills('languages', this)">Languages</button>
-                            <button class="skill-filter-btn" data-skill-cat="tools" onclick="filterSkills('tools', this)">Tools & Office</button>
-                            <button class="skill-filter-btn" data-skill-cat="database" onclick="filterSkills('database', this)">Database</button>
+                            <button class="skill-filter-btn active" data-skill-cat="all" onclick="filterSkills('all', this)"><i class="fas fa-border-all"></i> All</button>
+                            <button class="skill-filter-btn" data-skill-cat="frontend" onclick="filterSkills('frontend', this)"><i class="fas fa-laptop-code"></i> Frontend</button>
+                            <button class="skill-filter-btn" data-skill-cat="languages" onclick="filterSkills('languages', this)"><i class="fas fa-code"></i> Languages</button>
+                            <button class="skill-filter-btn" data-skill-cat="tools" onclick="filterSkills('tools', this)"><i class="fas fa-toolbox"></i> Tools & Office</button>
+                            <button class="skill-filter-btn" data-skill-cat="database" onclick="filterSkills('database', this)"><i class="fas fa-database"></i> Database</button>
                         </div>
                     </div>
 
                     <div class="skills-cards-grid" id="skills-cards-grid">
-                        <!-- Dynamic Skills Cards render here (with static fallback) -->
+                        <!-- Dynamic Skills Cards render here with static fallback showing icon and name -->
+                        <div class="skill-card reveal" data-skill-item-cat="frontend">
+                            <div class="skill-card-top">
+                                <div class="skill-icon-badge" style="background:#e44d2618; color:#e44d26; border:1px solid #e44d2635;">
+                                    <i class="fab fa-html5"></i>
+                                </div>
+                                <div class="skill-info">
+                                    <h4 class="skill-name">HTML5</h4>
+                                    <span class="skill-level-tag">Expert</span>
+                                </div>
+                                <div class="skill-pct-badge" style="background:#e44d2620; color:#e44d26; border:1px solid #e44d2640;">95%</div>
+                            </div>
+                            <div class="skill-progress-bar-bg">
+                                <div class="skill-progress-bar-fill" style="width: 95%; background: linear-gradient(90deg, #e44d26, #a855f7);"></div>
+                            </div>
+                        </div>
+                        <div class="skill-card reveal" data-skill-item-cat="frontend">
+                            <div class="skill-card-top">
+                                <div class="skill-icon-badge" style="background:#264de418; color:#264de4; border:1px solid #264de435;">
+                                    <i class="fab fa-css3-alt"></i>
+                                </div>
+                                <div class="skill-info">
+                                    <h4 class="skill-name">CSS3</h4>
+                                    <span class="skill-level-tag">Expert</span>
+                                </div>
+                                <div class="skill-pct-badge" style="background:#264de420; color:#264de4; border:1px solid #264de440;">90%</div>
+                            </div>
+                            <div class="skill-progress-bar-bg">
+                                <div class="skill-progress-bar-fill" style="width: 90%; background: linear-gradient(90deg, #264de4, #a855f7);"></div>
+                            </div>
+                        </div>
+                        <div class="skill-card reveal" data-skill-item-cat="frontend">
+                            <div class="skill-card-top">
+                                <div class="skill-icon-badge" style="background:#f7df1e18; color:#f7df1e; border:1px solid #f7df1e35;">
+                                    <i class="fab fa-js"></i>
+                                </div>
+                                <div class="skill-info">
+                                    <h4 class="skill-name">JavaScript (with AI)</h4>
+                                    <span class="skill-level-tag">Proficient</span>
+                                </div>
+                                <div class="skill-pct-badge" style="background:#f7df1e20; color:#f7df1e; border:1px solid #f7df1e40;">60%</div>
+                            </div>
+                            <div class="skill-progress-bar-bg">
+                                <div class="skill-progress-bar-fill" style="width: 60%; background: linear-gradient(90deg, #f7df1e, #a855f7);"></div>
+                            </div>
+                        </div>
+                        <div class="skill-card reveal" data-skill-item-cat="languages">
+                            <div class="skill-card-top">
+                                <div class="skill-icon-badge" style="background:#3776ab18; color:#3776ab; border:1px solid #3776ab35;">
+                                    <i class="fab fa-python"></i>
+                                </div>
+                                <div class="skill-info">
+                                    <h4 class="skill-name">Python</h4>
+                                    <span class="skill-level-tag">Intermediate</span>
+                                </div>
+                                <div class="skill-pct-badge" style="background:#3776ab20; color:#3776ab; border:1px solid #3776ab40;">37%</div>
+                            </div>
+                            <div class="skill-progress-bar-bg">
+                                <div class="skill-progress-bar-fill" style="width: 37%; background: linear-gradient(90deg, #3776ab, #a855f7);"></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

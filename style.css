@@ -3172,6 +3172,9 @@ body.modal-lock { overflow: hidden !important; }
     font-weight: 600;
     cursor: pointer;
     transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .skill-filter-btn:hover {
