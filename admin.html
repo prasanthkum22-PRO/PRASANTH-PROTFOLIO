@@ -647,6 +647,89 @@
         #toast.show { transform: translateY(0); opacity: 1; }
         #toast.success { background: #052e16; border: 1px solid #166534; color: #86efac; }
         #toast.error { background: #450a0a; border: 1px solid #991b1b; color: #fca5a5; }
+
+        /* ── Utility classes (replaces inline styles) ── */
+        .admin-tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .admin-tab-header--sm { gap: 10px; margin-bottom: 16px; }
+        .flex-center-gap { display: flex; align-items: center; gap: 8px; }
+        .flex-gap-sm { display: flex; gap: 8px; }
+        .flex-gap-md { display: flex; gap: 10px; align-items: center; }
+        .tab-subtext { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+        .form-subtext { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .btn-auto { width: auto; padding: 10px 22px; }
+        .btn-auto-sm { width: auto; padding: 8px 18px; }
+        .btn-auto-lg { width: auto; padding: 10px 24px; }
+        .btn-fixed-h { width: auto; padding: 10px 24px; height: 42px; }
+        .btn-publish { width: auto; padding: 9px 24px; }
+        .icon-accent { color: var(--accent); }
+        .col-full { grid-column: 1 / -1; }
+        .form-label { font-size: 0.8rem; color: var(--text-muted); }
+        .form-label--flex { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .admin-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+        .admin-input--flex {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+        .admin-input--search {
+            width: 240px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+        .admin-input--url {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .admin-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+        .admin-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+        .admin-form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .admin-form-cell { flex: 1; min-width: 260px; }
+        .admin-list-col { display: flex; flex-direction: column; gap: 10px; }
+        .admin-skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        .card-mt { margin-top: 20px; }
+        .card-mb { margin-bottom: 20px; }
+        .loading-text { color: var(--text-muted); grid-column: 1 / -1; }
+        .add-block-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .block-picker-title { font-size: 1.05rem; }
+        .block-picker-sub { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; }
+        .cover-bar { margin-bottom: 20px; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); }
+        .add-block-zone-inner { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); padding: 14px; border-radius: 14px; border: 1px dashed var(--border); }
+        .login-btn-mt { margin-top: 10px; }
+        .btn-max-content { width: max-content; padding: 10px 24px; }
     </style>
 </head>
 
@@ -672,7 +755,7 @@
                     <input type="password" id="admin-password" placeholder="Password" required>
                     <i class="fas fa-key"></i>
                 </div>
-                <button type="submit" class="btn-primary" id="login-btn" style="margin-top: 10px;">
+                <button type="submit" class="btn-primary login-btn-mt" id="login-btn">
                     <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
             </form>
@@ -724,17 +807,20 @@
                 <button class="tab-btn" onclick="switchTab('profile')">
                     <i class="fas fa-user-gear"></i> Profile & Site Info
                 </button>
+                <button class="tab-btn" onclick="switchTab('resume')">
+                    <i class="fas fa-file-invoice"></i> Resume & Skills
+                </button>
             </div>
 
             <!-- Tab 1: Messages -->
             <div id="tab-messages" class="tab-content active">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-                        <h3><i class="fas fa-inbox" style="color:var(--accent);"></i> Contact Messages Inbox</h3>
-                        <input type="text" id="msg-search" placeholder="Search messages..." oninput="renderMessages()" style="width:240px;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                    <div class="admin-tab-header">
+                        <h3><i class="fas fa-inbox icon-accent"></i> Contact Messages Inbox</h3>
+                        <input type="text" id="msg-search" placeholder="Search messages..." oninput="renderMessages()" class="admin-input--search">
                     </div>
                     <div id="messages-grid" class="cards-grid">
-                        <p style="color:var(--text-muted);grid-column:1/-1;">Loading messages...</p>
+                        <p class="loading-text">Loading messages...</p>
                     </div>
                 </div>
             </div>
@@ -742,16 +828,16 @@
             <!-- Tab 2: Blogs -->
             <div id="tab-blogs" class="tab-content">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                    <div class="admin-tab-header">
                         <div>
-                            <h3 style="display:flex;align-items:center;gap:8px;">
-                                <i class="fas fa-pen-to-square" style="color:var(--accent);"></i> Blog Posts List
+                            <h3 class="flex-center-gap">
+                                <i class="fas fa-pen-to-square icon-accent"></i> Blog Posts List
                             </h3>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                            <p class="tab-subtext">
                                 Create dynamic block-by-block blog posts with headings, text highlights, step guides, buttons, images, code, and videos.
                             </p>
                         </div>
-                        <button class="btn-primary" onclick="openCmsEditor('blog')" style="width:auto;padding:10px 22px;">
+                        <button class="btn-primary btn-auto" onclick="openCmsEditor('blog')">
                             <i class="fas fa-plus"></i> New Blog Post
                         </button>
                     </div>
@@ -762,16 +848,16 @@
             <!-- Tab 3: Projects -->
             <div id="tab-projects" class="tab-content">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                    <div class="admin-tab-header">
                         <div>
-                            <h3 style="display:flex;align-items:center;gap:8px;">
-                                <i class="fas fa-laptop-code" style="color:var(--accent);"></i> Projects List
+                            <h3 class="flex-center-gap">
+                                <i class="fas fa-laptop-code icon-accent"></i> Projects List
                             </h3>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                            <p class="tab-subtext">
                                 Build rich project showcases block-by-block with tech badges, live demo buttons, step guides, screenshots, and code snippets.
                             </p>
                         </div>
-                        <button class="btn-primary" onclick="openCmsEditor('project')" style="width:auto;padding:10px 22px;">
+                        <button class="btn-primary btn-auto" onclick="openCmsEditor('project')">
                             <i class="fas fa-plus"></i> New Project
                         </button>
                     </div>
@@ -782,16 +868,16 @@
             <!-- Tab 4: Certificates -->
             <div id="tab-certificates" class="tab-content">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                    <div class="admin-tab-header">
                         <div>
-                            <h3 style="display:flex;align-items:center;gap:8px;">
-                                <i class="fas fa-certificate" style="color:var(--accent);"></i> Certificates List
+                            <h3 class="flex-center-gap">
+                                <i class="fas fa-certificate icon-accent"></i> Certificates List
                             </h3>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                            <p class="tab-subtext">
                                 Showcase certificates with custom image blocks, verification buttons, syllabus steps, and highlight badges.
                             </p>
                         </div>
-                        <button class="btn-primary" onclick="openCmsEditor('certificate')" style="width:auto;padding:10px 22px;">
+                        <button class="btn-primary btn-auto" onclick="openCmsEditor('certificate')">
                             <i class="fas fa-plus"></i> New Certificate
                         </button>
                     </div>
@@ -802,16 +888,16 @@
             <!-- Tab 5: Ideas -->
             <div id="tab-ideas" class="tab-content">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+                    <div class="admin-tab-header">
                         <div>
-                            <h3 style="display:flex;align-items:center;gap:8px;">
-                                <i class="fas fa-lightbulb" style="color:var(--accent);"></i> Project Guides List
+                            <h3 class="flex-center-gap">
+                                <i class="fas fa-lightbulb icon-accent"></i> Project Guides List
                             </h3>
-                            <p style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
+                            <p class="tab-subtext">
                                 Create dynamic block-by-block posts with headings, text highlights, step guides, buttons, code blocks, and videos.
                             </p>
                         </div>
-                        <button class="btn-primary" onclick="openCmsEditor('idea')" style="width:auto;padding:10px 22px;">
+                        <button class="btn-primary btn-auto" onclick="openCmsEditor('idea')">
                             <i class="fas fa-plus"></i> New Project Guide
                         </button>
                     </div>
@@ -822,70 +908,126 @@
             <!-- Tab 6: Profile & Site Info -->
             <div id="tab-profile" class="tab-content">
                 <div class="admin-card">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-                        <h3><i class="fas fa-user-gear" style="color:var(--accent);"></i> Profile & Site Sidebar Settings</h3>
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <h3><i class="fas fa-user-gear icon-accent"></i> Profile & Site Sidebar Settings</h3>
                         <a href="index.html" target="_blank" class="btn-secondary"><i class="fas fa-external-link-alt"></i> Preview Live Index</a>
                     </div>
-                    <form onsubmit="handleSiteProfileSubmit(event)" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;">
+                    <form onsubmit="handleSiteProfileSubmit(event)" class="admin-form-grid">
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Full Name *</label>
-                            <input type="text" id="site-profile-name" placeholder="K. Prasanth" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Full Name *</label>
+                            <input type="text" id="site-profile-name" placeholder="K. Prasanth" required class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Title / Designation *</label>
-                            <input type="text" id="site-profile-title" placeholder="Web Developer | Designer" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Title / Designation *</label>
+                            <input type="text" id="site-profile-title" placeholder="Web Developer | Designer" required class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Avatar Photo URL</label>
-                            <div style="display:flex;gap:8px;">
-                                <input type="url" id="site-profile-avatar" placeholder="co-founder.jpg" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Avatar Photo URL</label>
+                            <div class="flex-gap-sm">
+                                <input type="url" id="site-profile-avatar" placeholder="co-founder.jpg" class="admin-input--flex">
                                 <button type="button" class="btn-secondary" onclick="openCloudinaryWidget('site-profile-avatar')"><i class="fas fa-upload"></i></button>
                             </div>
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Email *</label>
-                            <input type="email" id="site-profile-email" placeholder="prasanth.kum22@gmail.com" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Email *</label>
+                            <input type="email" id="site-profile-email" placeholder="prasanth.kum22@gmail.com" required class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Phone *</label>
-                            <input type="tel" id="site-profile-phone" placeholder="+91 82486 78722" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" id="site-profile-phone" placeholder="+91 82486 78722" required class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">GitHub URL</label>
-                            <input type="url" id="site-profile-github" placeholder="https://github.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">GitHub URL</label>
+                            <input type="url" id="site-profile-github" placeholder="https://github.com/..." class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">LinkedIn URL</label>
-                            <input type="url" id="site-profile-linkedin" placeholder="https://linkedin.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">LinkedIn URL</label>
+                            <input type="url" id="site-profile-linkedin" placeholder="https://linkedin.com/..." class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Instagram URL</label>
-                            <input type="url" id="site-profile-instagram" placeholder="https://instagram.com/..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Instagram URL</label>
+                            <input type="url" id="site-profile-instagram" placeholder="https://instagram.com/..." class="admin-input">
                         </div>
-                        <div style="grid-column:1/-1;">
-                            <label style="font-size:0.8rem;color:var(--text-muted);">About Summary Bio</label>
-                            <textarea id="site-profile-about" placeholder="Write a short summary..." style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);"></textarea>
+                        <div class="col-full">
+                            <label class="form-label">About Summary Bio</label>
+                            <textarea id="site-profile-about" placeholder="Write a short summary..." class="admin-textarea"></textarea>
                         </div>
                 </div>
 
                 <!-- Admin Credentials Card -->
-                <div class="admin-card" style="margin-top:20px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                        <h3><i class="fas fa-key" style="color:var(--accent);"></i> Admin Login & Security Settings</h3>
+                <div class="admin-card card-mt">
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <h3><i class="fas fa-key icon-accent"></i> Admin Login & Security Settings</h3>
                     </div>
-                    <form onsubmit="handleAdminSecuritySubmit(event)" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:16px;">
+                    <form onsubmit="handleAdminSecuritySubmit(event)" class="admin-form-grid">
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">Admin Email Address</label>
-                            <input type="email" id="admin-security-email" placeholder="admin@example.com" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">Admin Email Address</label>
+                            <input type="email" id="admin-security-email" placeholder="admin@example.com" required class="admin-input">
                         </div>
                         <div>
-                            <label style="font-size:0.8rem;color:var(--text-muted);">New Admin Password</label>
-                            <input type="password" id="admin-security-password" placeholder="Enter new password" required style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);">
+                            <label class="form-label">New Admin Password</label>
+                            <input type="password" id="admin-security-password" placeholder="Enter new password" required class="admin-input">
                         </div>
-                        <div style="grid-column:1/-1;">
-                            <button type="submit" class="btn-primary" style="width:max-content;padding:10px 24px;"><i class="fas fa-shield-halved"></i> Update Admin Credentials</button>
+                        <div class="col-full">
+                            <button type="submit" class="btn-primary btn-max-content"><i class="fas fa-shield-halved"></i> Update Admin Credentials</button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- Tab 7: Resume & Skills Manager -->
+            <div id="tab-resume" class="tab-content">
+                <!-- Card 1: Resume PDF Link -->
+                <div class="admin-card card-mb">
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <h3><i class="fas fa-file-pdf icon-accent"></i> Downloadable Resume Settings</h3>
+                    </div>
+                    <form onsubmit="handleResumePdfSubmit(event)" class="admin-form-row">
+                        <div class="admin-form-cell">
+                            <label class="form-label">Resume PDF URL / Document Path</label>
+                            <div class="flex-gap-sm" style="margin-top:4px;">
+                                <input type="text" id="admin-resume-url" placeholder="resume.pdf or https://cloudinary.../resume.pdf" class="admin-input--flex">
+                                <button type="button" class="btn-secondary" onclick="openCloudinaryWidget('admin-resume-url')"><i class="fas fa-upload"></i> Upload PDF</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary btn-fixed-h"><i class="fas fa-save"></i> Save Resume Link</button>
+                    </form>
+                </div>
+
+                <!-- Card 2: Education Manager -->
+                <div class="admin-card card-mb">
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <div>
+                            <h3><i class="fas fa-graduation-cap icon-accent"></i> Education Items</h3>
+                            <p class="form-subtext">Manage degrees, colleges, and school qualifications.</p>
+                        </div>
+                        <button class="btn-primary btn-auto-sm" onclick="openEduModal()"><i class="fas fa-plus"></i> Add Education</button>
+                    </div>
+                    <div id="admin-edu-list" class="admin-list-col"></div>
+                </div>
+
+                <!-- Card 3: Experience Manager -->
+                <div class="admin-card card-mb">
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <div>
+                            <h3><i class="fas fa-briefcase icon-accent"></i> Experience Items</h3>
+                            <p class="form-subtext">Manage work experience, freelance roles, and internships.</p>
+                        </div>
+                        <button class="btn-primary btn-auto-sm" onclick="openExpModal()"><i class="fas fa-plus"></i> Add Experience</button>
+                    </div>
+                    <div id="admin-exp-list" class="admin-list-col"></div>
+                </div>
+
+                <!-- Card 4: Skills Manager -->
+                <div class="admin-card">
+                    <div class="admin-tab-header admin-tab-header--sm">
+                        <div>
+                            <h3><i class="fas fa-sliders icon-accent"></i> Creative Skills Manager</h3>
+                            <p class="form-subtext">Manage technical skills, proficiency %, category, and icons.</p>
+                        </div>
+                        <button class="btn-primary btn-auto-sm" onclick="openSkillModal()"><i class="fas fa-plus"></i> Add New Skill</button>
+                    </div>
+                    <div id="admin-skills-list" class="admin-skills-grid"></div>
                 </div>
             </div>
 
@@ -902,10 +1044,10 @@
                 <i class="fas fa-arrow-left"></i> <span id="cms-editor-back-text">Back</span>
             </button>
             <div class="editor-topbar-title" id="cms-editor-header-title">
-                <i class="fas fa-cubes" style="color: var(--accent);"></i>
+                <i class="fas fa-cubes icon-accent"></i>
                 Content Builder
             </div>
-            <button type="button" class="btn-primary" onclick="postCmsContent()" style="width: auto; padding: 9px 24px;">
+            <button type="button" class="btn-primary btn-publish" onclick="postCmsContent()">
                 <i class="fas fa-paper-plane"></i> Publish Post
             </button>
         </div>
@@ -915,12 +1057,12 @@
             <input type="text" id="idea-post-title" class="post-title-input" placeholder="Title your project guide…" autocomplete="off">
 
             <!-- Dedicated Cover Image Bar -->
-            <div style="margin-bottom:20px;padding:14px 18px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.15);">
-                <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:8px;">
-                    <i class="fas fa-image" style="color:var(--accent);"></i> Post Cover / Banner Image (Thumbnail)
+            <div class="cover-bar">
+                <label class="form-label--flex">
+                    <i class="fas fa-image icon-accent"></i> Post Cover / Banner Image (Thumbnail)
                 </label>
-                <div style="display:flex;gap:10px;align-items:center;">
-                    <input type="url" id="cms-cover-image" placeholder="Image URL (e.g. https://... or click Upload)" style="flex:1;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:0.88rem;outline:none;">
+                <div class="flex-gap-md">
+                    <input type="url" id="cms-cover-image" placeholder="Image URL (e.g. https://... or click Upload)" class="admin-input--url">
                     <button type="button" class="btn-secondary" onclick="openCloudinaryWidget('cms-cover-image')">
                         <i class="fas fa-upload"></i> Upload Cover
                     </button>
@@ -930,12 +1072,12 @@
             <div id="idea-blocks-canvas"></div>
 
             <!-- Add Block Trigger Zone -->
-            <div class="add-block-zone" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);padding:14px;border-radius:14px;border:1px dashed var(--border);">
+            <div class="add-block-zone add-block-zone-inner">
                 <button class="btn-add-block" onclick="openBlockPicker()" title="Add content block">
                     <i class="fas fa-plus"></i>
                 </button>
-                <div style="font-size:0.85rem;color:var(--text-muted);font-weight:500;">
-                    Click <strong style="color:var(--accent);">+</strong> to add content block cards (14 block types available!)
+                <div class="add-block-label">
+                    Click <strong class="icon-accent">+</strong> to add content block cards (14 block types available!)
                 </div>
             </div>
         </div>
@@ -944,11 +1086,11 @@
     <!-- Block Type Picker Modal -->
     <div id="block-picker-overlay" onclick="handlePickerBackdrop(event)">
         <div class="block-picker-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <h4 style="font-size:1.05rem;">Choose a Content Block</h4>
+            <div class="admin-tab-header" style="margin-bottom:8px;">
+                <h4 class="block-picker-title">Choose a Content Block</h4>
                 <button class="block-btn-icon" onclick="closeBlockPicker()"><i class="fas fa-times"></i></button>
             </div>
-            <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">Select content block type to add to your post</p>
+            <p class="block-picker-sub">Select content block type to add to your post</p>
             
             <div class="picker-grid">
                 <button class="picker-item-btn" onclick="pickBlockType('title')">
@@ -1078,6 +1220,7 @@
             loadCertificates();
             loadIdeas();
             loadSiteProfileForm();
+            loadResumeTab();
         }
 
         function switchTab(tabId) {
@@ -1222,6 +1365,11 @@
         function sortItemsByNewest(items) {
             if (!Array.isArray(items)) return [];
             return items.sort((a, b) => {
+                const isBestA = a && (a.is_best === true || a.is_featured === true);
+                const isBestB = b && (b.is_best === true || b.is_featured === true);
+                if (isBestA && !isBestB) return -1;
+                if (!isBestA && isBestB) return 1;
+
                 const getTs = (x) => {
                     if (!x) return 0;
                     if (x.created_at) return new Date(x.created_at).getTime();
@@ -1235,6 +1383,98 @@
                 };
                 return getTs(b) - getTs(a);
             });
+        }
+
+        async function toggleMarkAsBest(type, itemId) {
+            const keyMap = {
+                blog: ['portfolio_blogs', 'blogs'],
+                project: ['portfolio_projects', 'projects'],
+                certificate: ['portfolio_certificates', 'certificates'],
+                idea: ['project_ideas', 'ideas'],
+                education: ['portfolio_education', 'education'],
+                experience: ['portfolio_experience', 'experience'],
+                skill: ['portfolio_skills', 'skills']
+            };
+            const [primaryKey, simpleKey] = keyMap[type] || ['project_ideas', 'ideas'];
+            const strId = String(itemId);
+
+            try {
+                let snap = null;
+                let useKey = primaryKey;
+                if (firebaseDb) {
+                    snap = await firebaseDb.collection(primaryKey).doc(strId).get();
+                    if (!snap.exists && simpleKey) {
+                        const snap2 = await firebaseDb.collection(simpleKey).doc(strId).get();
+                        if (snap2.exists) { snap = snap2; useKey = simpleKey; }
+                    }
+                }
+
+                const currentData = snap && snap.exists ? snap.data() : {};
+                const isCurrentlyBest = currentData.is_best === true || currentData.is_featured === true;
+                const newStatus = !isCurrentlyBest;
+
+                if (firebaseDb) {
+                    // Single featured enforcement: unmark all other items in this collection
+                    if (newStatus) {
+                        const allDocs = await firebaseDb.collection(useKey).get();
+                        const batch = firebaseDb.batch();
+                        allDocs.forEach(doc => {
+                            if (doc.id !== strId && (doc.data().is_best || doc.data().is_featured)) {
+                                batch.update(doc.ref, { is_best: false, is_featured: false });
+                            }
+                        });
+                        await batch.commit();
+                    }
+
+                    // Update target item
+                    await firebaseDb.collection(useKey).doc(strId).set({
+                        ...currentData,
+                        is_best: newStatus,
+                        is_featured: newStatus
+                    }, { merge: true });
+                }
+
+                // Update local storage arrays if applicable
+                const localMap = {
+                    blog: 'portfolio_blogs',
+                    project: 'portfolio_projects',
+                    certificate: 'portfolio_certificates',
+                    idea: 'project_ideas',
+                    education: 'portfolio_education',
+                    experience: 'portfolio_experience',
+                    skill: 'portfolio_skills'
+                };
+                const locKey = localMap[type];
+                if (locKey) {
+                    try {
+                        let arr = JSON.parse(localStorage.getItem(locKey) || '[]');
+                        arr = arr.map(item => {
+                            if (String(item.id) === strId) {
+                                return { ...item, is_best: newStatus, is_featured: newStatus };
+                            } else if (newStatus) {
+                                return { ...item, is_best: false, is_featured: false };
+                            }
+                            return item;
+                        });
+                        localStorage.setItem(locKey, JSON.stringify(arr));
+                    } catch (e) {}
+                }
+
+                showToast(newStatus ? '⭐ Marked as Best Item!' : 'Unmarked Best Item', 'success');
+
+                // Reload section view
+                if (type === 'blog') loadBlogs();
+                else if (type === 'project') loadProjects();
+                else if (type === 'certificate') loadCertificates();
+                else if (type === 'idea') loadIdeas();
+                else if (type === 'education') loadEducation();
+                else if (type === 'experience') loadExperience();
+                else if (type === 'skill') loadSkills();
+
+            } catch (err) {
+                console.error("Error toggling Best status:", err);
+                showToast("Failed to update Best status: " + err.message, "error");
+            }
         }
 
         function renderCmsCardGrid(type, gridId, posts, emptyText) {
@@ -1260,12 +1500,19 @@
                 const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : (p.date || 'Recent');
                 const cnt = (p.blocks || []).length || 1;
                 const safeId = String(p.id).replace(/'/g, "\\'");
+                const isBest = p.is_best === true || p.is_featured === true;
 
-                return `<div class="item-card">
-                    <h4 style="margin-bottom:6px;">${escHtml(p.title || 'Untitled')}</h4>
+                const bestBtn = isBest
+                    ? `<button class="btn-best active" style="background:#ef4444;color:#fff;border:none;padding:5px 12px;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="toggleMarkAsBest('${type}', '${safeId}')"><i class="fas fa-star" style="color:#fef08a;"></i> ⭐ Featured / Best</button>`
+                    : `<button class="btn-best" style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:5px 12px;border-radius:8px;font-size:0.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="toggleMarkAsBest('${type}', '${safeId}')"><i class="far fa-star"></i> ⭐ Mark as Best</button>`;
+
+                return `<div class="item-card" style="position:relative; ${isBest ? 'border:2px solid #ef4444;box-shadow:0 4px 16px rgba(239,68,68,0.25);' : ''}">
+                    ${isBest ? `<div style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:3px 9px;border-radius:12px;font-size:0.65rem;font-weight:800;letter-spacing:0.5px;"><i class="fas fa-star" style="color:#fef08a;"></i> BEST</div>` : ''}
+                    <h4 style="margin-bottom:6px;padding-right:${isBest ? '65px' : '0'};">${escHtml(p.title || 'Untitled')}</h4>
                     <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;"><i class="fas fa-calendar-alt"></i> ${dateStr} • <i class="fas fa-cubes"></i> ${cnt} block${cnt !== 1 ? 's' : ''}</p>
                     ${previewDesc ? `<p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">${escHtml(previewDesc)}</p>` : ''}
-                    <div style="display:flex;gap:8px;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                        ${bestBtn}
                         <button class="btn-secondary" onclick="openCmsEditor('${type}', '${safeId}')"><i class="fas fa-edit"></i> Edit</button>
                         <button class="btn-del" onclick="deleteCmsPost('${type}', '${safeId}')"><i class="fas fa-trash"></i> Delete</button>
                     </div>
@@ -2162,6 +2409,328 @@
             } else {
                 showToast("⚠️ Please enter a valid email and password.", "error");
             }
+        }
+
+        /* ══════════════════════════════════════
+           RESUME & SKILLS ADMIN LOGIC
+        ══════════════════════════════════════ */
+        let adminEduItems = [];
+        let adminExpItems = [];
+        let adminSkillItems = [];
+
+        async function loadResumeTab() {
+            // Load Resume PDF setting
+            const savedPdf = localStorage.getItem('portfolio_resume_pdf') || 'resume.pdf';
+            const pdfInput = document.getElementById('admin-resume-url');
+            if (pdfInput) pdfInput.value = savedPdf;
+
+            // Load Education
+            try {
+                if (firebaseDb) {
+                    const snap = await firebaseDb.collection('portfolio_education').get();
+                    if (!snap.empty) {
+                        adminEduItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    } else {
+                        adminEduItems = JSON.parse(localStorage.getItem('portfolio_education') || '[]');
+                    }
+                } else {
+                    adminEduItems = JSON.parse(localStorage.getItem('portfolio_education') || '[]');
+                }
+            } catch(e) {
+                adminEduItems = JSON.parse(localStorage.getItem('portfolio_education') || '[]');
+            }
+            renderEduList();
+
+            // Load Experience
+            try {
+                if (firebaseDb) {
+                    const snap = await firebaseDb.collection('portfolio_experience').get();
+                    if (!snap.empty) {
+                        adminExpItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    } else {
+                        adminExpItems = JSON.parse(localStorage.getItem('portfolio_experience') || '[]');
+                    }
+                } else {
+                    adminExpItems = JSON.parse(localStorage.getItem('portfolio_experience') || '[]');
+                }
+            } catch(e) {
+                adminExpItems = JSON.parse(localStorage.getItem('portfolio_experience') || '[]');
+            }
+            renderExpList();
+
+            // Load Skills
+            try {
+                if (firebaseDb) {
+                    const snap = await firebaseDb.collection('portfolio_skills').get();
+                    if (!snap.empty) {
+                        adminSkillItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    } else {
+                        adminSkillItems = JSON.parse(localStorage.getItem('portfolio_skills') || '[]');
+                    }
+                } else {
+                    adminSkillItems = JSON.parse(localStorage.getItem('portfolio_skills') || '[]');
+                }
+            } catch(e) {
+                adminSkillItems = JSON.parse(localStorage.getItem('portfolio_skills') || '[]');
+            }
+            renderSkillList();
+        }
+
+        function handleResumePdfSubmit(e) {
+            e.preventDefault();
+            const url = document.getElementById('admin-resume-url').value.trim();
+            if (url) {
+                localStorage.setItem('portfolio_resume_pdf', url);
+                if (firebaseDb) {
+                    firebaseDb.collection('portfolio_resume_meta').doc('download').set({ url: url }).catch(console.warn);
+                }
+                showToast("📄 Resume Download PDF URL updated!", "success");
+            }
+        }
+
+        function renderEduList() {
+            const container = document.getElementById('admin-edu-list');
+            if (!container) return;
+            adminEduItems = sortItemsByNewest(adminEduItems);
+            if (adminEduItems.length === 0) {
+                container.innerHTML = '<p style="font-size:0.85rem;color:var(--text-muted);">No custom education entries. Default static education will be displayed on index.html. Click <strong>"+ Add Education"</strong> to customize.</p>';
+                return;
+            }
+            container.innerHTML = adminEduItems.map(item => {
+                const isBest = item.is_best === true || item.is_featured === true;
+                const bestBtn = isBest
+                    ? `<button class="btn-best active" style="background:#ef4444;color:#fff;border:none;padding:5px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;" onclick="toggleMarkAsBest('education', '${item.id}')"><i class="fas fa-star" style="color:#fef08a;"></i> ⭐ Best</button>`
+                    : `<button class="btn-best" style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:5px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;cursor:pointer;" onclick="toggleMarkAsBest('education', '${item.id}')"><i class="far fa-star"></i> ⭐ Mark Best</button>`;
+
+                return `
+                <div style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid ${isBest ? '#ef4444' : 'var(--border)'};border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;">
+                    <div>
+                        <strong style="color:var(--text-primary);font-size:0.95rem;">${escHtml(item.title)}</strong> ${isBest ? '<span style="background:#ef4444;color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:10px;font-weight:800;">⭐ BEST</span>' : ''}
+                        <div style="font-size:0.8rem;color:var(--accent);">${escHtml(item.subtitle || '')} • ${escHtml(item.period || '')}</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${escHtml(item.description || '')}</p>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        ${bestBtn}
+                        <button class="btn-secondary" onclick="openEduModal('${item.id}')" style="padding:5px 10px;font-size:0.75rem;"><i class="fas fa-edit"></i></button>
+                        <button class="btn-del" onclick="deleteEduItem('${item.id}')" style="padding:5px 10px;font-size:0.75rem;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;}).join('');
+        }
+
+        async function openEduModal(id = null) {
+            const existing = id ? adminEduItems.find(x => String(x.id) === String(id)) : null;
+            const title = prompt("Degree / Course Title:", existing ? existing.title : "");
+            if (title === null) return;
+            const subtitle = prompt("College / School / Institution Name:", existing ? existing.subtitle : "");
+            if (subtitle === null) return;
+            const period = prompt("Year / Period (e.g. 2024 — 2025):", existing ? existing.period : "");
+            if (period === null) return;
+            const description = prompt("Short Description / Details:", existing ? existing.description : "");
+            if (description === null) return;
+
+            const newItem = {
+                id: id || ('edu_' + Date.now()),
+                title: title.trim(),
+                subtitle: subtitle.trim(),
+                period: period.trim(),
+                description: description.trim(),
+                is_best: existing ? (existing.is_best || false) : false,
+                updated_at: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = adminEduItems.findIndex(x => String(x.id) === String(id));
+                if (idx !== -1) adminEduItems[idx] = newItem;
+            } else {
+                adminEduItems.push(newItem);
+            }
+
+            localStorage.setItem('portfolio_education', JSON.stringify(adminEduItems));
+            if (firebaseDb) {
+                try {
+                    await firebaseDb.collection('portfolio_education').doc(String(newItem.id)).set(newItem);
+                } catch(e) { console.warn(e); }
+            }
+            renderEduList();
+            showToast("🎓 Education saved successfully!", "success");
+        }
+
+        async function deleteEduItem(id) {
+            if (!confirm("Are you sure you want to delete this education entry?")) return;
+            adminEduItems = adminEduItems.filter(x => String(x.id) !== String(id));
+            localStorage.setItem('portfolio_education', JSON.stringify(adminEduItems));
+            if (firebaseDb) {
+                try { await firebaseDb.collection('portfolio_education').doc(String(id)).delete(); } catch(e) {}
+            }
+            renderEduList();
+            showToast("Deleted education item", "success");
+        }
+
+        function renderExpList() {
+            const container = document.getElementById('admin-exp-list');
+            if (!container) return;
+            adminExpItems = sortItemsByNewest(adminExpItems);
+            if (adminExpItems.length === 0) {
+                container.innerHTML = '<p style="font-size:0.85rem;color:var(--text-muted);">No custom experience entries. Default static experience will be displayed on index.html. Click <strong>"+ Add Experience"</strong> to customize.</p>';
+                return;
+            }
+            container.innerHTML = adminExpItems.map(item => {
+                const isBest = item.is_best === true || item.is_featured === true;
+                const bestBtn = isBest
+                    ? `<button class="btn-best active" style="background:#ef4444;color:#fff;border:none;padding:5px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;" onclick="toggleMarkAsBest('experience', '${item.id}')"><i class="fas fa-star" style="color:#fef08a;"></i> ⭐ Best</button>`
+                    : `<button class="btn-best" style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:5px 10px;border-radius:8px;font-size:0.75rem;font-weight:600;cursor:pointer;" onclick="toggleMarkAsBest('experience', '${item.id}')"><i class="far fa-star"></i> ⭐ Mark Best</button>`;
+
+                return `
+                <div style="padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid ${isBest ? '#ef4444' : 'var(--border)'};border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <div>
+                        <strong style="color:var(--text-primary);font-size:0.95rem;">${escHtml(item.title)}</strong> ${isBest ? '<span style="background:#ef4444;color:#fff;font-size:0.6rem;padding:2px 6px;border-radius:10px;font-weight:800;">⭐ BEST</span>' : ''}
+                        <div style="font-size:0.8rem;color:var(--accent);">${escHtml(item.subtitle || '')} • ${escHtml(item.period || '')}</div>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${escHtml(item.description || '')}</p>
+                    </div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        ${bestBtn}
+                        <button class="btn-secondary" onclick="openExpModal('${item.id}')" style="padding:5px 10px;font-size:0.75rem;"><i class="fas fa-edit"></i></button>
+                        <button class="btn-del" onclick="deleteExpItem('${item.id}')" style="padding:5px 10px;font-size:0.75rem;"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;}).join('');
+        }
+
+        async function openExpModal(id = null) {
+            const existing = id ? adminExpItems.find(x => String(x.id) === String(id)) : null;
+            const title = prompt("Job Title / Role:", existing ? existing.title : "");
+            if (title === null) return;
+            const subtitle = prompt("Company / Organization:", existing ? existing.subtitle : "");
+            if (subtitle === null) return;
+            const period = prompt("Period (e.g. 2026 — Present):", existing ? existing.period : "");
+            if (period === null) return;
+            const description = prompt("Description / Key Achievements:", existing ? existing.description : "");
+            if (description === null) return;
+
+            const newItem = {
+                id: id || ('exp_' + Date.now()),
+                title: title.trim(),
+                subtitle: subtitle.trim(),
+                period: period.trim(),
+                description: description.trim(),
+                is_best: existing ? (existing.is_best || false) : false,
+                updated_at: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = adminExpItems.findIndex(x => String(x.id) === String(id));
+                if (idx !== -1) adminExpItems[idx] = newItem;
+            } else {
+                adminExpItems.push(newItem);
+            }
+
+            localStorage.setItem('portfolio_experience', JSON.stringify(adminExpItems));
+            if (firebaseDb) {
+                try {
+                    await firebaseDb.collection('portfolio_experience').doc(String(newItem.id)).set(newItem);
+                } catch(e) { console.warn(e); }
+            }
+            renderExpList();
+            showToast("💼 Experience saved successfully!", "success");
+        }
+
+        function deleteExpItem(id) {
+            if (!confirm("Are you sure you want to delete this experience entry?")) return;
+            adminExpItems = adminExpItems.filter(x => String(x.id) !== String(id));
+            localStorage.setItem('portfolio_experience', JSON.stringify(adminExpItems));
+            if (firebaseDb) {
+                try { firebaseDb.collection('portfolio_experience').doc(String(id)).delete(); } catch(e) {}
+            }
+            renderExpList();
+            showToast("Deleted experience item", "success");
+        }
+
+        function renderSkillList() {
+            const container = document.getElementById('admin-skills-list');
+            if (!container) return;
+            adminSkillItems = sortItemsByNewest(adminSkillItems);
+            if (adminSkillItems.length === 0) {
+                container.innerHTML = '<p style="grid-column:1/-1;font-size:0.85rem;color:var(--text-muted);">No custom skills created. Default static skills will be displayed on index.html. Click <strong>"+ Add New Skill"</strong> to add customizable skills.</p>';
+                return;
+            }
+            container.innerHTML = adminSkillItems.map(item => {
+                const isBest = item.is_best === true || item.is_featured === true;
+                const bestBtn = isBest
+                    ? `<button class="btn-best active" style="background:#ef4444;color:#fff;border:none;padding:4px 8px;border-radius:6px;font-size:0.7rem;font-weight:700;cursor:pointer;" onclick="toggleMarkAsBest('skill', '${item.id}')"><i class="fas fa-star" style="color:#fef08a;"></i> ⭐ Best</button>`
+                    : `<button class="btn-best" style="background:rgba(239,68,68,0.08);color:#ef4444;border:1px solid rgba(239,68,68,0.3);padding:4px 8px;border-radius:6px;font-size:0.7rem;font-weight:600;cursor:pointer;" onclick="toggleMarkAsBest('skill', '${item.id}')"><i class="far fa-star"></i> ⭐ Best</button>`;
+
+                return `
+                <div style="padding:14px;background:rgba(255,255,255,0.03);border:1px solid ${isBest ? '#ef4444' : 'var(--border)'};border-radius:14px;position:relative;">
+                    ${isBest ? `<span style="position:absolute;top:6px;right:6px;background:#ef4444;color:#fff;font-size:0.58rem;padding:2px 6px;border-radius:8px;font-weight:800;">⭐ BEST</span>` : ''}
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-right:${isBest ? '50px' : '0'};">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <i class="${escHtml(item.icon || 'fas fa-code')}" style="color:${escHtml(item.color || 'var(--accent)')};font-size:1.1rem;"></i>
+                            <strong style="color:var(--text-primary);">${escHtml(item.name)}</strong>
+                        </div>
+                        <span style="font-size:0.78rem;font-weight:700;color:var(--accent);">${escHtml(String(item.percentage))}%</span>
+                    </div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:10px;text-transform:capitalize;">Category: ${escHtml(item.category || 'frontend')}</div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        ${bestBtn}
+                        <button class="btn-secondary" onclick="openSkillModal('${item.id}')" style="padding:4px 10px;font-size:0.75rem;"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn-del" onclick="deleteSkillItem('${item.id}')" style="padding:4px 10px;font-size:0.75rem;"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `;}).join('');
+        }
+
+        async function openSkillModal(id = null) {
+            const existing = id ? adminSkillItems.find(x => String(x.id) === String(id)) : null;
+            const name = prompt("Skill Name (e.g., HTML5, Python, React):", existing ? existing.name : "");
+            if (name === null) return;
+            const percentageStr = prompt("Proficiency Percentage (0 to 100):", existing ? String(existing.percentage) : "80");
+            if (percentageStr === null) return;
+            const category = prompt("Category (frontend / languages / tools / database):", existing ? existing.category : "frontend");
+            if (category === null) return;
+            const icon = prompt("FontAwesome Icon Class (e.g. fab fa-html5, fab fa-python, fas fa-database):", existing ? existing.icon : "fas fa-code");
+            if (icon === null) return;
+            const color = prompt("Brand Color Accent Hex/HSL (e.g. #e44d26, #3776ab, #7c3aed):", existing ? existing.color : "#7c3aed");
+            if (color === null) return;
+
+            const pct = Math.min(100, Math.max(0, parseInt(percentageStr) || 50));
+
+            const newItem = {
+                id: id || ('skill_' + Date.now()),
+                name: name.trim(),
+                percentage: pct,
+                category: category.trim().toLowerCase(),
+                icon: icon.trim(),
+                color: color.trim() || '#7c3aed',
+                updated_at: new Date().toISOString()
+            };
+
+            if (id) {
+                const idx = adminSkillItems.findIndex(x => String(x.id) === String(id));
+                if (idx !== -1) adminSkillItems[idx] = newItem;
+            } else {
+                adminSkillItems.push(newItem);
+            }
+
+            localStorage.setItem('portfolio_skills', JSON.stringify(adminSkillItems));
+            if (firebaseDb) {
+                try {
+                    await firebaseDb.collection('portfolio_skills').doc(String(newItem.id)).set(newItem);
+                } catch(e) { console.warn(e); }
+            }
+            renderSkillList();
+            showToast("⚡ Skill saved successfully!", "success");
+        }
+
+        function deleteSkillItem(id) {
+            if (!confirm("Are you sure you want to delete this skill?")) return;
+            adminSkillItems = adminSkillItems.filter(x => String(x.id) !== String(id));
+            localStorage.setItem('portfolio_skills', JSON.stringify(adminSkillItems));
+            if (firebaseDb) {
+                try { firebaseDb.collection('portfolio_skills').doc(String(id)).delete(); } catch(e) {}
+            }
+            renderSkillList();
+            showToast("Deleted skill item", "success");
         }
 
         /* Toast Helper */

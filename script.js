@@ -30,6 +30,7 @@ async function initApp() {
     if (typeof syncBlogs === "function") syncBlogs();
     if (typeof syncCertificates === "function") syncCertificates();
     if (typeof loadProjectIdeas === "function") loadProjectIdeas();
+    if (typeof syncResumeSection === "function") syncResumeSection();
 
     // Set up real-time subscription channels
     if (typeof setupRealtimeChannels === "function") setupRealtimeChannels();
@@ -379,6 +380,11 @@ function triggerReveal() {
 function sortItemsByNewest(items) {
     if (!Array.isArray(items)) return [];
     return items.sort((a, b) => {
+        const isBestA = a && (a.is_best === true || a.is_featured === true);
+        const isBestB = b && (b.is_best === true || b.is_featured === true);
+        if (isBestA && !isBestB) return -1;
+        if (!isBestA && isBestB) return 1;
+
         const getTs = (x) => {
             if (!x) return 0;
             if (x.created_at) return new Date(x.created_at).getTime();
@@ -489,7 +495,6 @@ async function syncProjects() {
         ];
     }
     
-    // Sort newest first
     data = sortItemsByNewest(data);
 
     data.forEach((item, index) => {
@@ -499,14 +504,17 @@ async function syncProjects() {
         projectItem.dataset.category = (item.category || "").toLowerCase();
         projectItem.style.transitionDelay = (index * 0.07) + "s";
         projectItem.style.cursor = "pointer";
+        projectItem.style.position = "relative";
         
         const imageUrl = item.image || getProjectPlaceholderImage(item.category);
-
         const firstTextBlock = (item.blocks || []).find(b => b.type === 'text' || b.type === 'highlight');
         const descText = firstTextBlock ? firstTextBlock.content : (item.text || item.category || '');
-        
+        const isBest = item.is_best === true || item.is_featured === true;
+        const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
+
         projectItem.innerHTML = `
-            <div onclick="openCmsModal('project', '${item.id}')">
+            <div onclick="openCmsModal('project', '${item.id}')" style="position:relative;">
+                ${ribbonMarkup}
                 <figure class="project-img">
                     <div class="project-item-icon-box"><i class="fas fa-eye"></i></div>
                     <img src="${imageUrl}" alt="${escHtml(item.title)}" loading="lazy">
@@ -552,7 +560,6 @@ async function syncBlogs() {
         ];
     }
 
-    // Sort newest first
     data = sortItemsByNewest(data);
 
     data.forEach((item, index) => {
@@ -560,6 +567,7 @@ async function syncBlogs() {
         blogItem.className = "blog-post-item reveal dynamic-blog";
         blogItem.style.transitionDelay = (index * 0.1) + "s";
         blogItem.style.cursor = "pointer";
+        blogItem.style.position = "relative";
         
         const imgBlock = (item.blocks || []).find(b => b.type === 'image');
         const imageUrl = item.image ? item.image : (imgBlock && imgBlock.url ? imgBlock.url : getBlogPlaceholderImage(item.category));
@@ -571,8 +579,12 @@ async function syncBlogs() {
             ? new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) 
             : (item.date || 'Recent');
 
+        const isBest = item.is_best === true || item.is_featured === true;
+        const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
+
         blogItem.innerHTML = `
-            <div onclick="openCmsModal('blog', '${item.id}')">
+            <div onclick="openCmsModal('blog', '${item.id}')" style="position:relative;">
+                ${ribbonMarkup}
                 <figure class="blog-banner-box">
                     <img src="${imageUrl}" alt="${escHtml(item.title)}" loading="lazy">
                 </figure>
@@ -593,8 +605,47 @@ async function syncBlogs() {
     setTimeout(triggerReveal, 100);
 }
 
+const DEFAULT_CERTIFICATES = [
+    {
+        id: 'cert_default_1',
+        title: 'Honours Diploma in Computer Application (HDCA)',
+        issuer: 'CSC Computer Software College, Arni — Jul 2024 to Jul 2025',
+        image: 'csccertification.jpg',
+        description: 'Overall Grade: A (Excellent). Course coverage includes MS-Office (Word, Excel, PowerPoint), HTML5 & CSS3, MySQL, C Language, OOPS using C++, Python, Internet, and Digital Marketing & ChatGPT.',
+        created_at: '2025-07-01T00:00:00.000Z'
+    },
+    {
+        id: 'cert_default_2',
+        title: 'HDCA Official Transcript — All A Grades',
+        issuer: 'CSC Computer Software College, Arni — Regn. No: SMCE3145',
+        image: 'csccertification1.jpg',
+        description: 'Scored Grade A in all 10 subjects across the complete HDCA curriculum: MS-Word, MS-Excel, MS-PowerPoint, C Language, OOPS using C++, Python, Internet, HTML5 & CSS3, MySQL, and Digital Marketing.',
+        created_at: '2025-07-02T00:00:00.000Z'
+    },
+    {
+        id: 'cert_default_3',
+        title: 'Full-Stack Web Development Certification',
+        issuer: 'CSC Computer Software College & Self-Learning',
+        image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=600&auto=format&fit=crop',
+        description: 'Certified in HTML5, CSS3, JavaScript, Responsive Web Design, dynamic web APIs, and backend integration.',
+        created_at: '2025-08-01T00:00:00.000Z'
+    },
+    {
+        id: 'cert_default_4',
+        title: 'Python & Database Management Certification',
+        issuer: 'CSC Computer Software College & Project Showcase',
+        image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=600&auto=format&fit=crop',
+        description: 'Specialization in Python programming, Object-Oriented Programming (OOP), MySQL database design, and query optimization.',
+        created_at: '2025-09-01T00:00:00.000Z'
+    }
+];
+
 async function syncCertificates() {
     let data = await fetchFirestoreCollection('portfolio_certificates', 'certificates');
+
+    if (!data || data.length === 0) {
+        data = DEFAULT_CERTIFICATES;
+    }
 
     window.allCertificates = data;
 
@@ -604,58 +655,90 @@ async function syncCertificates() {
     if (!grid) return;
 
     const staticCerts = document.querySelectorAll(".static-certificate");
-    if (data && data.length > 0) {
-        staticCerts.forEach(el => el.style.display = "none");
-    } else {
-        staticCerts.forEach(el => el.style.display = "block");
-    }
+    staticCerts.forEach(el => el.style.display = "none");
+
+    const moreWrap = document.getElementById("cert-more-wrap");
+    const moreCountEl = document.getElementById("more-certs-count");
 
     data = sortItemsByNewest(data);
 
-    data.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.className = "cert-card dynamic-certificate reveal reveal-scale";
-        card.style.transitionDelay = (index * 0.1) + "s";
-        card.style.cursor = "pointer";
+    // Limit cards on main page to max 2
+    const displayData = data.slice(0, 2);
 
-        const safeTitle = escHtml(item.title);
-        const safeIssuer = escHtml(item.issuer || "Verified Certificate");
-
-        const firstTextBlock = (item.blocks || []).find(b => b.type === 'text' || b.type === 'highlight');
-        const safeDesc = escHtml(firstTextBlock ? firstTextBlock.content : (item.description || ""));
-        
-        const imgBlock = (item.blocks || []).find(b => b.type === 'image');
-        const safeImg = item.image ? escHtml(item.image) : (imgBlock ? escHtml(imgBlock.url) : "");
-
-        const imgSection = safeImg
-            ? `<div class="cert-card-img-wrap">
-                   <img src="${safeImg}" alt="${safeTitle}" loading="lazy">
-                   <div class="cert-card-overlay">
-                       <span class="cert-card-overlay-text"><i class="fas fa-expand"></i> View Certificate</span>
-                   </div>
-               </div>`
-            : `<div class="cert-card-img-wrap">
-                   <div class="cert-card-img-placeholder"><i class="fas fa-certificate"></i></div>
-               </div>`;
-
-        card.innerHTML = `
-            ${imgSection}
-            <div class="cert-card-body">
-                <div class="cert-card-title">${safeTitle}</div>
-                <div class="cert-card-issuer">${safeIssuer}</div>
-                <div class="cert-card-desc">${safeDesc.slice(0, 80)}${safeDesc.length > 80 ? '…' : ''}</div>
-                <div class="cert-badge"><i class="fas fa-award"></i> Verified</div>
-            </div>
-        `;
-
-        card.addEventListener("click", () => {
-            openCmsModal('certificate', item.id);
-        });
-
+    displayData.forEach((item, index) => {
+        const card = createCertCardElement(item, index);
         grid.appendChild(card);
     });
 
+    if (data.length > 2) {
+        if (moreWrap) {
+            moreWrap.style.display = "block";
+            if (moreCountEl) moreCountEl.textContent = data.length - 2;
+        }
+    } else {
+        if (moreWrap) moreWrap.style.display = "none";
+    }
+
     setTimeout(triggerReveal, 100);
+}
+
+function createCertCardElement(item, index) {
+    const card = document.createElement("div");
+    card.className = "cert-card dynamic-certificate reveal reveal-scale";
+    card.style.transitionDelay = (index * 0.1) + "s";
+
+    const safeTitle  = escHtml(item.title || 'Certificate');
+    const safeIssuer = escHtml(item.issuer || 'Verified Certificate');
+    const firstTextBlock = (item.blocks || []).find(b => b.type === 'text' || b.type === 'highlight');
+    const safeDesc = escHtml(firstTextBlock ? firstTextBlock.content : (item.description || ''));
+    const imgBlock = (item.blocks || []).find(b => b.type === 'image');
+    const safeImg  = item.image ? escHtml(item.image) : (imgBlock ? escHtml(imgBlock.url) : '');
+
+    const isBest = item.is_best === true || item.is_featured === true;
+    const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
+
+    const imgSection = safeImg
+        ? `<div class="cert-img-wrap" style="position:relative;">
+               ${ribbonMarkup}
+               <img src="${safeImg}" alt="${safeTitle}" loading="lazy">
+               <div class="cert-img-hover"><i class="fas fa-expand"></i> View</div>
+           </div>`
+        : `<div class="cert-img-wrap" style="position:relative;">
+               ${ribbonMarkup}
+               <div class="clb-no-img" style="display:flex;"><i class="fas fa-certificate"></i></div>
+           </div>`;
+
+    card.innerHTML = `
+        ${imgSection}
+        <div class="cert-body">
+            <div class="cert-chips">
+                <span class="cert-chip c-green"><i class="fas fa-circle-check"></i> Verified</span>
+            </div>
+            <h4 class="cert-title">${safeTitle}</h4>
+            <p class="cert-issuer"><i class="fas fa-building-columns"></i> ${safeIssuer}</p>
+            <p class="cert-desc">${safeDesc}</p>
+            <div class="cert-footer">
+                <span class="cert-tag"><i class="fas fa-scroll"></i> Official</span>
+                <span class="cert-arrow-btn"><i class="fas fa-arrow-right"></i></span>
+            </div>
+        </div>
+    `;
+
+    card.addEventListener("click", () => openCertLightbox(item));
+    return card;
+}
+
+function openAllCertsModal(e) {
+    if (!e) {
+        window.open('certificates.html', '_blank');
+    }
+}
+
+function closeAllCertsModal() {
+    const modal = document.getElementById("all-certs-modal");
+    if (modal) modal.style.display = "none";
+    document.body.classList.remove('modal-lock');
+    document.body.style.overflow = "";
 }
 
 /* ══════════════════════════════════════
@@ -717,40 +800,113 @@ async function openCmsModal(type, id) {
 
     if (modal) {
         modal.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-lock');
     }
+}
+
+function isAnyOtherModalOpen() {
+    const allCertsModal = document.getElementById("all-certs-modal");
+    const certLightbox = document.getElementById("cert-lightbox");
+    const cmsModal = document.getElementById("cms-reader-modal");
+
+    return (allCertsModal && window.getComputedStyle(allCertsModal).display !== "none") ||
+           (certLightbox && certLightbox.classList.contains("open")) ||
+           (cmsModal && window.getComputedStyle(cmsModal).display !== "none");
 }
 
 function closeCmsModal() {
     const modal = document.getElementById('cms-reader-modal');
     if (modal) modal.style.display = 'none';
-    document.body.style.overflow = '';
+    if (!isAnyOtherModalOpen()) {
+        document.body.classList.remove('modal-lock');
+        document.body.style.overflow = '';
+    }
 }
 
-function openCertLightbox(imgSrc, title, issuer, desc) {
-    const lb = document.getElementById("cert-lightbox");
-    const lbImg = document.getElementById("cert-lightbox-img");
+function openCertLightbox(item) {
+    if (!item) return;
+    const lb      = document.getElementById('cert-lightbox');
+    const leftCol = document.getElementById('clb-left');
+    const img     = document.getElementById('cert-lightbox-img');
+    const viewBtn = document.getElementById('cert-lb-view-img-btn');
+    const openBtn = document.getElementById('cert-lb-open-btn');
+    const dateRow = document.getElementById('cert-lightbox-date-row');
+    const dateEl  = document.getElementById('cert-lightbox-date');
+
+    // Resolve image
+    const imgBlock = (item.blocks || []).find(b => b.type === 'image');
+    const imgSrc = item.image || (imgBlock ? imgBlock.url : '');
 
     if (imgSrc) {
-        lbImg.src = imgSrc;
-        lbImg.style.display = "block";
+        img.src = imgSrc;
+        img.style.display = 'block';
+        if (leftCol) leftCol.removeAttribute('data-no-img');
+        [viewBtn, openBtn].forEach(btn => { if (btn) { btn.href = imgSrc; btn.style.display = ''; } });
     } else {
-        lbImg.style.display = "none";
+        img.src = '';
+        img.style.display = 'none';
+        if (leftCol) leftCol.setAttribute('data-no-img', 'true');
+        [viewBtn, openBtn].forEach(btn => { if (btn) btn.style.display = 'none'; });
     }
 
-    document.getElementById("cert-lightbox-title").textContent = title || "";
-    document.getElementById("cert-lightbox-issuer").textContent = issuer || "";
-    document.getElementById("cert-lightbox-desc").textContent = desc || "";
+    // Date
+    if (item.created_at) {
+        const formatted = new Date(item.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+        if (dateEl)  dateEl.textContent = formatted;
+        if (dateRow) dateRow.style.display = 'flex';
+    } else {
+        if (dateRow) dateRow.style.display = 'none';
+    }
 
-    if (lb) lb.classList.add("open");
-    document.body.style.overflow = "hidden";
+    // Full description
+    const firstTextBlock = (item.blocks || []).find(b => b.type === 'text' || b.type === 'highlight');
+    const fullDesc = firstTextBlock ? firstTextBlock.content : (item.description || '');
+
+    document.getElementById('cert-lightbox-title').textContent  = item.title  || '';
+    document.getElementById('cert-lightbox-issuer').textContent = item.issuer || 'Verified Certificate';
+    document.getElementById('cert-lightbox-desc').textContent   = fullDesc;
+
+    if (lb) lb.classList.add('open');
+    document.body.classList.add('modal-lock');
+}
+
+// Open by static id — used by the hardcoded fallback HTML cards
+function openCertLightboxById(staticId) {
+    if (window.allCertificates) {
+        const found = window.allCertificates.find(x => String(x.id) === String(staticId));
+        if (found) { openCertLightbox(found); return; }
+    }
+    const staticMap = {
+        cert_static_1: {
+            id: 'cert_static_1',
+            title: 'Honours Diploma in Computer Application (HDCA)',
+            issuer: 'CSC Computer Software College, Arni \u2014 Jul 2024 to Jul 2025',
+            image: 'csccertification.jpg',
+            description: 'Overall Grade: A (Excellent). Course coverage includes MS-Office (Word, Excel, PowerPoint), HTML5 & CSS3, MySQL, C Language, OOPS using C++, Python, Internet, and Digital Marketing & ChatGPT.',
+            created_at: '2025-07-01T00:00:00.000Z'
+        },
+        cert_static_2: {
+            id: 'cert_static_2',
+            title: 'HDCA Official Transcript \u2014 All A Grades',
+            issuer: 'CSC Computer Software College, Arni \u2014 Regn. No: SMCE3145',
+            image: 'csccertification1.jpg',
+            description: 'Scored Grade A in all 10 subjects across the complete HDCA curriculum: MS-Word, MS-Excel, MS-PowerPoint, C Language, OOPS using C++, Python, Internet, HTML5 & CSS3, MySQL, and Digital Marketing.',
+            created_at: '2025-07-02T00:00:00.000Z'
+        }
+    };
+    openCertLightbox(staticMap[staticId] || null);
 }
 
 function closeCertLightbox() {
-    const lb = document.getElementById("cert-lightbox");
-    if (lb) lb.classList.remove("open");
-    document.body.style.overflow = "";
+    const lb = document.getElementById('cert-lightbox');
+    if (lb) lb.classList.remove('open');
+    if (!isAnyOtherModalOpen()) {
+        document.body.classList.remove('modal-lock');
+        document.body.style.overflow = '';
+    }
 }
+
+
 
 function setupRealtimeChannels() {
     if (!firebaseDb) return;
@@ -767,9 +923,170 @@ function setupRealtimeChannels() {
         firebaseDb.collection('certificates').onSnapshot(() => {
             if (typeof syncCertificates === "function") syncCertificates();
         }, e => console.warn("Firebase certs listener notice:", e));
+
+        firebaseDb.collection('portfolio_education').onSnapshot(() => {
+            if (typeof syncEducation === "function") syncEducation();
+        }, e => console.warn("Firebase edu listener notice:", e));
+
+        firebaseDb.collection('portfolio_experience').onSnapshot(() => {
+            if (typeof syncExperience === "function") syncExperience();
+        }, e => console.warn("Firebase exp listener notice:", e));
+
+        firebaseDb.collection('portfolio_skills').onSnapshot(() => {
+            if (typeof syncSkills === "function") syncSkills();
+        }, e => console.warn("Firebase skills listener notice:", e));
     } catch (err) {
         console.warn("Realtime listener error:", err);
     }
+}
+
+/* ══════════════════════════════════════
+   RESUME & SKILLS DYNAMIC SYNC
+══════════════════════════════════════ */
+async function syncResumeSection() {
+    syncResumePDF();
+    syncEducation();
+    syncExperience();
+    syncSkills();
+}
+
+function syncResumePDF() {
+    const linkEl = document.getElementById("download-resume-btn");
+    if (!linkEl) return;
+    const saved = localStorage.getItem("portfolio_resume_pdf") || "resume.pdf";
+    linkEl.setAttribute("href", saved);
+}
+
+async function syncEducation() {
+    const listEl = document.getElementById("education-timeline-list");
+    if (!listEl) return;
+
+    let items = await fetchFirestoreCollection('portfolio_education', 'portfolio_education');
+    if (!items || items.length === 0) {
+        items = JSON.parse(localStorage.getItem('portfolio_education') || '[]');
+    }
+
+    if (items.length === 0) return;
+
+    items = sortItemsByNewest(items);
+
+    listEl.innerHTML = items.map(item => {
+        const isBest = item.is_best === true || item.is_featured === true;
+        const ribbonMarkup = isBest ? `<span style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:0.6rem;padding:2px 7px;border-radius:10px;font-weight:800;margin-left:6px;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-star" style="color:#fef08a;font-size:0.6rem;"></i> BEST</span>` : '';
+        return `
+        <li class="timeline-item">
+            <h4 class="h4 timeline-item-title">${escHtml(item.title)} ${ribbonMarkup}</h4>
+            <span>${escHtml(item.subtitle || '')} ${item.period ? '— ' + escHtml(item.period) : ''}</span>
+            <p class="timeline-text">${escHtml(item.description || '')}</p>
+        </li>
+    `;}).join('');
+}
+
+async function syncExperience() {
+    const listEl = document.getElementById("experience-timeline-list");
+    if (!listEl) return;
+
+    let items = await fetchFirestoreCollection('portfolio_experience', 'portfolio_experience');
+    if (!items || items.length === 0) {
+        items = JSON.parse(localStorage.getItem('portfolio_experience') || '[]');
+    }
+
+    if (items.length === 0) return;
+
+    items = sortItemsByNewest(items);
+
+    listEl.innerHTML = items.map(item => {
+        const isBest = item.is_best === true || item.is_featured === true;
+        const ribbonMarkup = isBest ? `<span style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-size:0.6rem;padding:2px 7px;border-radius:10px;font-weight:800;margin-left:6px;display:inline-flex;align-items:center;gap:3px;"><i class="fas fa-star" style="color:#fef08a;font-size:0.6rem;"></i> BEST</span>` : '';
+        return `
+        <li class="timeline-item">
+            <h4 class="h4 timeline-item-title">${escHtml(item.title)} ${ribbonMarkup}</h4>
+            <span>${escHtml(item.subtitle || '')} ${item.period ? '— ' + escHtml(item.period) : ''}</span>
+            <p class="timeline-text">${escHtml(item.description || '')}</p>
+        </li>
+    `;}).join('');
+}
+
+const DEFAULT_SKILLS = [
+    { name: "HTML5", percentage: 95, category: "frontend", icon: "fab fa-html5", color: "#e44d26" },
+    { name: "CSS3", percentage: 90, category: "frontend", icon: "fab fa-css3-alt", color: "#264de4" },
+    { name: "JavaScript (with AI)", percentage: 60, category: "frontend", icon: "fab fa-js", color: "#f7df1e" },
+    { name: "Python", percentage: 37, category: "languages", icon: "fab fa-python", color: "#3776ab" },
+    { name: "C Language", percentage: 30, category: "languages", icon: "fas fa-code", color: "#00599c" },
+    { name: "C++ (OOP)", percentage: 30, category: "languages", icon: "fas fa-code", color: "#004482" },
+    { name: "MS Word", percentage: 75, category: "tools", icon: "fas fa-file-word", color: "#2b579a" },
+    { name: "MS Excel", percentage: 55, category: "tools", icon: "fas fa-file-excel", color: "#217346" },
+    { name: "MS PowerPoint", percentage: 50, category: "tools", icon: "fas fa-file-powerpoint", color: "#d24726" },
+    { name: "MySQL", percentage: 65, category: "database", icon: "fas fa-database", color: "#00758f" },
+    { name: "Digital Marketing", percentage: 20, category: "tools", icon: "fas fa-bullhorn", color: "#ff6b6b" }
+];
+
+async function syncSkills() {
+    const gridEl = document.getElementById("skills-cards-grid");
+    if (!gridEl) return;
+
+    let items = await fetchFirestoreCollection('portfolio_skills', 'portfolio_skills');
+    if (!items || items.length === 0) {
+        items = JSON.parse(localStorage.getItem('portfolio_skills') || '[]');
+    }
+
+    if (items.length === 0) {
+        items = DEFAULT_SKILLS;
+    }
+
+    items = sortItemsByNewest(items);
+
+    gridEl.innerHTML = items.map((skill, index) => {
+        const cat = (skill.category || 'frontend').toLowerCase();
+        const color = skill.color || '#7c3aed';
+        const icon = skill.icon || 'fas fa-code';
+        const pct = skill.percentage || 50;
+        const isBest = skill.is_best === true || skill.is_featured === true;
+        const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
+
+        let levelStr = "Intermediate";
+        if (pct >= 85) levelStr = "Expert";
+        else if (pct >= 60) levelStr = "Proficient";
+        else if (pct < 35) levelStr = "Beginner";
+
+        return `
+            <div class="skill-card reveal" data-skill-item-cat="${cat}" style="transition-delay: ${(index * 0.04)}s; position:relative;">
+                ${ribbonMarkup}
+                <div class="skill-card-top">
+                    <div class="skill-icon-badge" style="background:${color}18; color:${color}; border:1px solid ${color}35;">
+                        <i class="${escHtml(icon)}"></i>
+                    </div>
+                    <div class="skill-info">
+                        <h4 class="skill-name">${escHtml(skill.name)}</h4>
+                        <span class="skill-level-tag">${levelStr}</span>
+                    </div>
+                    <div class="skill-pct-badge" style="background:${color}20; color:${color}; border:1px solid ${color}40;">
+                        ${pct}%
+                    </div>
+                </div>
+                <div class="skill-progress-bar-bg">
+                    <div class="skill-progress-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, ${color}, #a855f7);"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    setTimeout(triggerReveal, 100);
+}
+
+function filterSkills(category, btnEl) {
+    document.querySelectorAll(".skill-filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    const cards = document.querySelectorAll("#skills-cards-grid .skill-card");
+    cards.forEach(card => {
+        const cardCat = card.getAttribute("data-skill-item-cat");
+        if (category === "all" || cardCat === category) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
 }
 
 function escHtml(str) {
@@ -891,8 +1208,11 @@ async function loadProjectIdeas() {
         const previewText = textBlock ? textBlock.content : '';
         const preview = previewText ? previewText.slice(0, 100) + (previewText.length > 100 ? '…' : '') : '';
         const safeId = String(post.id).replace(/'/g, "\\'");
+        const isBest = post.is_best === true || post.is_featured === true;
+        const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
 
-        return `<div class="pi-card" onclick="openPiPost('${safeId}')" role="button" tabindex="0">
+        return `<div class="pi-card" onclick="openPiPost('${safeId}')" role="button" tabindex="0" style="position:relative;">
+            ${ribbonMarkup}
             ${thumb ? `<div class="pi-card-thumb"><img src="${escHtml(thumb)}" alt="${escHtml(post.title)}"></div>` : `<div class="pi-card-thumb pi-card-thumb--placeholder"><i class="fas fa-lightbulb"></i></div>`}
             <div class="pi-card-body">
                 <h3 class="pi-card-title">${escHtml(post.title)}</h3>
