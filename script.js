@@ -1040,14 +1040,8 @@ async function syncSkills() {
         const cat = (skill.category || 'frontend').toLowerCase();
         const color = skill.color || '#7c3aed';
         const icon = skill.icon || 'fas fa-code';
-        const pct = skill.percentage || 50;
         const isBest = skill.is_best === true || skill.is_featured === true;
         const ribbonMarkup = isBest ? `<div class="featured-ribbon"><i class="fas fa-star"></i> BEST</div>` : '';
-
-        let levelStr = "Intermediate";
-        if (pct >= 85) levelStr = "Expert";
-        else if (pct >= 60) levelStr = "Proficient";
-        else if (pct < 35) levelStr = "Beginner";
 
         return `
             <div class="skill-card reveal" data-skill-item-cat="${cat}" style="transition-delay: ${(index * 0.04)}s; position:relative;">
@@ -1058,14 +1052,7 @@ async function syncSkills() {
                     </div>
                     <div class="skill-info">
                         <h4 class="skill-name">${escHtml(skill.name)}</h4>
-                        <span class="skill-level-tag">${levelStr}</span>
                     </div>
-                    <div class="skill-pct-badge" style="background:${color}20; color:${color}; border:1px solid ${color}40;">
-                        ${pct}%
-                    </div>
-                </div>
-                <div class="skill-progress-bar-bg">
-                    <div class="skill-progress-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, ${color}, #a855f7);"></div>
                 </div>
             </div>
         `;

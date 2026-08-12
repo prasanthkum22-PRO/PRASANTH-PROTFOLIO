@@ -3192,18 +3192,17 @@ body.modal-lock { overflow: hidden !important; }
 
 .skills-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
 }
 
 .skill-card {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 18px;
+    border-radius: 16px;
+    padding: 14px 16px;
     display: flex;
-    flex-direction: column;
-    gap: 14px;
+    align-items: center;
     position: relative;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3212,15 +3211,16 @@ body.modal-lock { overflow: hidden !important; }
 }
 
 .skill-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     border-color: rgba(168, 85, 247, 0.4);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(124, 58, 237, 0.15);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 18px rgba(124, 58, 237, 0.15);
 }
 
 .skill-card-top {
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
 }
 
 .skill-icon-badge {
@@ -3243,7 +3243,7 @@ body.modal-lock { overflow: hidden !important; }
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    justify-content: center;
 }
 
 .skill-name {
